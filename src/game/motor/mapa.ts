@@ -13,7 +13,7 @@ export type MapaListo = {
   objetos2: Uint16Array; // segunda capa, para estampas que se montan unas sobre otras (el bosque del borde)
   encima: Uint16Array;
   solido: Uint8Array;
-  agua: { x: number; y: number }[]; // casillas de agua, para animar las ondas
+  agua: { x: number; y: number; interior: boolean }[]; // casillas de agua; las interiores pueden llevar ondas
   hotspots: Map<string, HotspotFijo>;
 };
 
@@ -59,7 +59,7 @@ export function parsearMapa(def: MapaDef, atlas: Atlas, estampas: Record<string,
   const objetos2 = new Uint16Array(n);
   const encima = new Uint16Array(n);
   const solido = new Uint8Array(n);
-  const agua: { x: number; y: number }[] = [];
+  const agua: { x: number; y: number; interior: boolean }[] = [];
 
   const pastos = (() => {
     const d = def.leyenda["."];
@@ -98,7 +98,7 @@ export function parsearMapa(def: MapaDef, atlas: Atlas, estampas: Record<string,
           autoEn(x - 1, y, d.auto, une),
         );
         suelo[i] = atlas.indice(`${d.auto}_${s}`) + 1;
-        if (d.auto === "agua") agua.push({ x, y });
+        if (d.auto === "agua") agua.push({ x, y, interior: s === "c" });
       } else if (ch !== "." && d.tile) {
         const nombres = Array.isArray(d.tile) ? d.tile : [d.tile];
         suelo[i] = atlas.indice(nombres[variante(x, y, nombres.length)]) + 1;

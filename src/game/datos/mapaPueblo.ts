@@ -55,12 +55,12 @@ colocaciones.push(
   { estampa: "roca_chica", x: 8, y: 5 },
 );
 
-// --- bosque del borde: árboles de 2 × 2 montados uno sobre otro, para que no queden huecos ---
-for (let x = 0; x < W - 1; x++) {
-  colocaciones.push({ estampa: x % 3 ? "arbol" : "arbol2", x, y: 0 });
-  colocaciones.push({ estampa: x % 3 ? "arbol2" : "arbol", x, y: H - 2 });
-}
-for (let y = 1; y < H - 2; y++) {
+// --- bosque del borde: dos filas de árboles de 2 × 2 alternadas, la de adelante tapa los troncos de la de atrás ---
+for (let x = 0; x < W; x += 2) colocaciones.push({ estampa: x % 4 ? "arbol" : "arbol2", x, y: 0 });
+for (let x = 1; x < W - 1; x += 2) colocaciones.push({ estampa: x % 4 === 1 ? "arbol2" : "arbol", x, y: 1 });
+for (let x = 1; x < W - 1; x += 2) colocaciones.push({ estampa: x % 4 === 1 ? "arbol" : "arbol2", x, y: H - 3 });
+for (let x = 0; x < W; x += 2) colocaciones.push({ estampa: x % 4 ? "arbol2" : "arbol", x, y: H - 2 });
+for (let y = 3; y < H - 3; y++) {
   colocaciones.push({ estampa: y % 3 ? "arbol2" : "arbol", x: 0, y });
   colocaciones.push({ estampa: y % 3 ? "arbol" : "arbol2", x: W - 2, y });
 }
@@ -69,7 +69,7 @@ colocaciones.push(
   { estampa: "arboleda", x: 11, y: 11 },
   { estampa: "arbol", x: 11, y: 6 },
   { estampa: "arbol2", x: 14, y: 3 },
-  { estampa: "arbol", x: 23, y: 10 },
+  { estampa: "arbol", x: 36, y: 10 },
   { estampa: "arbol2", x: 36, y: 13 },
   { estampa: "arbol", x: 3, y: 18 },
   { estampa: "arbol2", x: 12, y: 18 },

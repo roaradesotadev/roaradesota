@@ -363,15 +363,19 @@ export class Juego {
     c.fillRect(0, 0, this.vistaW, this.vistaH);
     c.drawImage(this.base, -cx, -cy);
 
-    // ondas sobre el estanque
+    // ondas sobre el estanque: solo en algunas casillas interiores, cada una en su propia fase
     if (this.ondas) {
-      const cuadro = Math.floor(this.reloj / 320) % 4;
+      const paso = Math.floor(this.reloj / 340);
+      c.globalAlpha = 0.35; // las ondas del paquete son discos opacos: suaves, como un brillo
       for (const a of this.mapa.agua) {
+        if (!a.interior || (a.x * 7 + a.y * 13) % 3 !== 0) continue;
         const sx = a.x * TILE - cx;
         const sy = a.y * TILE - cy;
         if (sx < -TILE || sy < -TILE || sx > this.vistaW || sy > this.vistaH) continue;
+        const cuadro = (paso + a.x + a.y) % 4;
         c.drawImage(this.ondas, cuadro * TILE, 0, TILE, TILE, sx, sy, TILE, TILE);
       }
+      c.globalAlpha = 1;
     }
 
     const entidades = [...this.npcs, this.jugador].sort((a, b) => a.py - b.py);
