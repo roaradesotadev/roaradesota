@@ -39,9 +39,8 @@
     font-size: 0.88rem;
   }
   :root {
-    --gutter: 48px;
-    --carril-0: 14px;
-    --carril-1: 34px;
+    /* el grafo dibuja sus carriles en 22 y 52 px: el canal debe contenerlos */
+    --gutter: 66px;
   }
 }
 
