@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Download } from "lucide-react";
+import { IconoPixel } from "@/components/IconoPixel";
 import { TRAYECTORIA, TEMAS, FORMACION, DOCENCIA_INTRO, DOCENCIA_EXPERIENCIA, PERFIL_RESUMEN } from "@/content/perfil";
 
 export const metadata: Metadata = {
@@ -12,19 +12,19 @@ export default function SobreMi() {
   return (
     <div className="pagina">
       <div aria-hidden="true" />
-      <div>
+      <div className="ficha">
         <h1>Sobre mí</h1>
         <p className="bajada">{PERFIL_RESUMEN}</p>
         <div className="acciones">
           <a className="boton" href="/cv/CV_Rodrigo_Arancibia.pdf" download>
-            <Download size={18} strokeWidth={2} aria-hidden="true" /> Bajar CV
+            <IconoPixel nombre="descargar" tam={2} /> Bajar CV
           </a>
           <Link className="enlace-sec" href="/hablemos">
-            Conversemos <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+            Conversemos <IconoPixel nombre="flecha_derecha" tam={2} />
           </Link>
         </div>
 
-        <h2>Trayectoria</h2>
+        <h2><IconoPixel nombre="cursor" tam={2} />Trayectoria</h2>
         <ul className="tabla-trayectoria">
           {TRAYECTORIA.map((t) => (
             <li key={t.rol}>
@@ -39,7 +39,7 @@ export default function SobreMi() {
           ))}
         </ul>
 
-        <h2>Docencia</h2>
+        <h2><IconoPixel nombre="cursor" tam={2} />Docencia</h2>
         <p>{DOCENCIA_INTRO}</p>
         <ul className="lista-resultado">
           {TEMAS.map((t) => (
@@ -48,7 +48,7 @@ export default function SobreMi() {
         </ul>
         <p style={{ marginTop: 18 }}>{DOCENCIA_EXPERIENCIA}</p>
 
-        <h2>Formación</h2>
+        <h2><IconoPixel nombre="cursor" tam={2} />Formación</h2>
         <ul className="lista-resultado">
           {FORMACION.map((f) => (
             <li key={f}>{f}</li>

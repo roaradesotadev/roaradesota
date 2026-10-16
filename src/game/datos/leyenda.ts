@@ -8,7 +8,7 @@ export const LEYENDA: Leyenda = {
   "*": { tile: "flores_rosa" },
   "+": { tile: "flores_amar" },
   "%": { tile: "flores_azul" },
-  "=": { auto: "camino" },
+  "=": { auto: "camino", une: ["plaza"] }, // el camino entra en la plaza sin borde
   p: { auto: "plaza" },
   "~": { auto: "agua", solido: true },
   // objetos sueltos (los árboles, rocas y edificios son estampas)

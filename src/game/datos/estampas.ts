@@ -15,13 +15,13 @@ type DefEdificio = {
 
 export const EDIFICIOS: Record<string, DefEdificio> = {
   sede_intnova: { ancho: 4, alto: 5, puertaCol: 2, hoja: ["house", 25, 7], techo: "#2f7d5b", filasTecho: 3 },
-  laboratorio: { ancho: 3, alto: 3, puertaCol: 1, hoja: ["house", 22, 0], techo: "#2a9d8f", filasTecho: 1 },
+  laboratorio: { ancho: 3, alto: 3, puertaCol: 1, hoja: ["house", 23, 0], techo: "#2a9d8f", filasTecho: 1 },
   casa_modelo: { ancho: 4, alto: 3, puertaCol: 1, hoja: ["house", 0, 0], techo: "#c94a3b", filasTecho: 1 },
   oficina: { ancho: 4, alto: 3, puertaCol: 1, hoja: ["house", 4, 0], techo: "#3d6fb5", filasTecho: 1 },
   banco: { ancho: 4, alto: 5, puertaCol: 1, hoja: ["house", 25, 14], techo: "#55607a", filasTecho: 3 },
   centro_comercial: { ancho: 3, alto: 3, puertaCol: 1, hoja: ["house", 16, 0], techo: "#8e4b9e", filasTecho: 1 },
   universidad: { ancho: 4, alto: 3, puertaCol: 1, hoja: ["house", 12, 0], techo: "#8c2f2f", filasTecho: 1 },
-  academia: { ancho: 3, alto: 3, puertaCol: 1, hoja: ["house", 19, 0], techo: "#d9822b", filasTecho: 1 },
+  academia: { ancho: 4, alto: 3, puertaCol: 2, hoja: ["house", 19, 0], techo: "#d9822b", filasTecho: 1 },
 };
 
 type DefDecorado = {
@@ -36,10 +36,10 @@ export const DECORADOS: Record<string, DefDecorado> = {
   arbol: { ancho: 2, alto: 2, hoja: ["nature", 0, 0], relleno: "arbol" },
   arbol2: { ancho: 2, alto: 2, hoja: ["nature", 18, 0], relleno: "arbol" },
   arboleda: { ancho: 3, alto: 3, hoja: ["nature", 16, 2], relleno: "arbol" },
-  roca_grande: { ancho: 4, alto: 4, hoja: ["nature", 16, 10], relleno: "muro" },
+  roca_grande: { ancho: 4, alto: 3, hoja: ["nature", 17, 10], relleno: "muro" },
   roca_media: { ancho: 3, alto: 3, hoja: ["nature", 12, 5], relleno: "muro" },
-  roca_chica: { ancho: 2, alto: 2, hoja: ["nature", 12, 8], relleno: "muro" },
-  mina_entrada: { ancho: 4, alto: 2, hoja: ["house", 0, 8], relleno: "cueva" },
+  roca_chica: { ancho: 2, alto: 2, hoja: ["nature", 13, 8], relleno: "muro" },
+  mina_entrada: { ancho: 3, alto: 2, hoja: ["house", 0, 8], relleno: "cueva" },
   torii: {
     ancho: 3,
     alto: 2,

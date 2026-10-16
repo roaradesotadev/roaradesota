@@ -9,7 +9,7 @@ export type Capa = "suelo" | "objetos" | "encima";
 
 // Un carácter del mapa ASCII. `tile` nombra un dibujo del atlas (con varios, se elige uno por posición);
 // `auto` nombra un conjunto con bordes (camino, agua, plaza) que se resuelve mirando a los vecinos.
-export type DefTile = { tile?: string | string[]; auto?: string; solido?: boolean; capa?: Capa };
+export type DefTile = { tile?: string | string[]; auto?: string; une?: string[]; solido?: boolean; capa?: Capa };
 export type Leyenda = Record<string, DefTile>;
 
 // Un edificio u objeto de varios tiles, ya resuelto a índices del atlas.

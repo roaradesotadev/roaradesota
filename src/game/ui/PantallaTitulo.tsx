@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { IconoPixel } from "@/components/IconoPixel";
 import type { Puente } from "../puente";
 import { useEstadoJuego } from "./usePuente";
 
@@ -27,7 +27,7 @@ export function PantallaTitulo({ puente, saliendo = false }: { puente: Puente; s
           {estado.tactil ? "Cruceta para caminar · A para hablar" : "Flechas para caminar · Espacio para hablar"}
         </p>
         <Link className="titulo-texto" href="/historial">
-          Prefiero leer: modo texto <ArrowRight size={17} strokeWidth={2.5} aria-hidden="true" />
+          Prefiero leer: modo texto <IconoPixel nombre="flecha_derecha" tam={2} />
         </Link>
       </div>
     </div>

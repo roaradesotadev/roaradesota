@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import type { Caso } from "@/content/casos";
+import { IconoPixel } from "@/components/IconoPixel";
 import type { Diff } from "@/content/historial";
 import { DiffProceso } from "./diff";
 import { RecreacionJarvis } from "./recreacion-jarvis";
@@ -67,10 +68,10 @@ export function CasoVista({ caso, diff }: { caso: Caso; diff?: Diff }) {
         aria-labelledby={`${base}-frente`}
         hidden={lado !== "frente"}
       >
-        <h2>El problema</h2>
+        <h2><IconoPixel nombre="cursor" tam={2} />El problema</h2>
         <p>{caso.problema}</p>
         {diff && <DiffProceso diff={diff} />}
-        <h2>Lo que cambió</h2>
+        <h2><IconoPixel nombre="cursor" tam={2} />Lo que cambió</h2>
         <ul className="lista-resultado">
           {caso.resultado.map((r) => (
             <li key={r}>{r}</li>
@@ -78,7 +79,7 @@ export function CasoVista({ caso, diff }: { caso: Caso; diff?: Diff }) {
         </ul>
         {caso.slug === "jarvis" && (
           <>
-            <h2>Así se ve una orden</h2>
+            <h2><IconoPixel nombre="cursor" tam={2} />Así se ve una orden</h2>
             <RecreacionJarvis />
           </>
         )}
@@ -91,7 +92,7 @@ export function CasoVista({ caso, diff }: { caso: Caso; diff?: Diff }) {
         aria-labelledby={`${base}-reverso`}
         hidden={lado !== "reverso"}
       >
-        <h2>Las piezas</h2>
+        <h2><IconoPixel nombre="cursor" tam={2} />Las piezas</h2>
         <ol className="piezas">
           {caso.piezas.map((p) => (
             <li key={p.n}>
@@ -104,7 +105,7 @@ export function CasoVista({ caso, diff }: { caso: Caso; diff?: Diff }) {
             </li>
           ))}
         </ol>
-        <h2>Las estaciones</h2>
+        <h2><IconoPixel nombre="cursor" tam={2} />Las estaciones</h2>
         <ol className="estaciones">
           {caso.estaciones.map((s) => (
             <li key={s.nombre}>
@@ -118,13 +119,13 @@ export function CasoVista({ caso, diff }: { caso: Caso; diff?: Diff }) {
             </li>
           ))}
         </ol>
-        <h2>Con qué</h2>
+        <h2><IconoPixel nombre="cursor" tam={2} />Con qué</h2>
         <ul className="herramientas">
           {caso.herramientas.map((h) => (
             <li key={h}>{h}</li>
           ))}
         </ul>
-        <h2>Lo que aprendí</h2>
+        <h2><IconoPixel nombre="cursor" tam={2} />Lo que aprendí</h2>
         <ul className="lista-resultado">
           {caso.aprendizajes.map((a) => (
             <li key={a}>{a}</li>

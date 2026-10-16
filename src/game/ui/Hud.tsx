@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, Gamepad2 } from "lucide-react";
+import { IconoPixel } from "@/components/IconoPixel";
 import type { Puente } from "../puente";
 import { useEstadoJuego } from "./usePuente";
 
@@ -18,12 +18,12 @@ export function Hud({ puente }: { puente: Puente }) {
             onClick={() => puente.actualizar({ tactil: !estado.tactil })}
             title={estado.tactil ? "Ocultar el mando" : "Mostrar el mando táctil"}
           >
-            <Gamepad2 size={18} strokeWidth={2.5} aria-hidden="true" />
+            <IconoPixel nombre="mando" tam={2} />
             <span className="sr-only">Mando táctil</span>
           </button>
         )}
         <Link className="hud-enlace" href="/historial">
-          <BookOpen size={18} strokeWidth={2.5} aria-hidden="true" />
+          <IconoPixel nombre="libro" tam={2} />
           Modo texto
         </Link>
       </div>

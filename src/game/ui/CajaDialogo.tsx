@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Play } from "lucide-react";
+import { IconoPixel } from "@/components/IconoPixel";
 import type { Puente } from "../puente";
 import type { EstadoDialogo, Opcion } from "../tipos";
 import { useEstadoJuego } from "./usePuente";
@@ -118,7 +118,7 @@ function Caja({ puente, d }: { puente: Puente; d: EstadoDialogo }) {
       </p>
       {!mostrarOpciones && completo && (
         <span className="dialogo-flecha" aria-hidden="true">
-          <ChevronDown size={22} strokeWidth={3} />
+          <IconoPixel nombre="chevron_abajo" tam={3} />
         </span>
       )}
       {mostrarOpciones && (
@@ -135,7 +135,7 @@ function Caja({ puente, d }: { puente: Puente; d: EstadoDialogo }) {
                   elegir(op);
                 }}
               >
-                {i === sel && <Play className="cursor" size={14} fill="currentColor" strokeWidth={0} aria-hidden="true" />}
+                {i === sel && <IconoPixel nombre="cursor" tam={2} className="cursor" />}
                 {op.texto}
               </button>
             </li>

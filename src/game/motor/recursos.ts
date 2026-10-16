@@ -6,6 +6,7 @@ import { Atlas, SUFIJOS_AUTO, pintarAviso, pintarBuzon, pintarLetrero, type Sufi
 export const BASE = "/juego";
 
 export type Hojas = {
+  ripples: HTMLImageElement; // 4 cuadros de ondas, se dibujan sobre el agua
   field: HTMLImageElement;
   floor: HTMLImageElement;
   water: HTMLImageElement;
@@ -23,10 +24,10 @@ export function cargarImagen(url: string): Promise<HTMLImageElement> {
 }
 
 export async function cargarHojas(): Promise<Hojas> {
-  const [field, floor, water, nature, house] = await Promise.all(
-    ["TilesetField", "TilesetFloor", "TilesetWater", "TilesetNature", "TilesetHouse"].map((n) => cargarImagen(`${BASE}/hojas/${n}.png`)),
+  const [field, floor, water, nature, house, ripples] = await Promise.all(
+    ["TilesetField", "TilesetFloor", "TilesetWater", "TilesetNature", "TilesetHouse", "Ripples"].map((n) => cargarImagen(`${BASE}/hojas/${n}.png`)),
   );
-  return { field, floor, water, nature, house };
+  return { field, floor, water, nature, house, ripples };
 }
 
 // Un conjunto con bordes: la posición del bloque de 3 × 3 y, si existen, las tiras y el punto suelto.

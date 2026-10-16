@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Copiar } from "@/components/copiar";
+import { IconoPixel } from "@/components/IconoPixel";
 
 export const metadata: Metadata = {
   title: "Hablemos",
@@ -13,7 +14,7 @@ export default function Hablemos() {
   return (
     <div className="pagina">
       <div aria-hidden="true" />
-      <div>
+      <div className="ficha">
         <h1>Conversemos 30 minutos</h1>
         <p className="bajada">
           Cuénteme qué proceso le quita más tiempo a su equipo, qué curso necesita o qué quiere construir.
@@ -24,7 +25,7 @@ export default function Hablemos() {
           </a>
           <Copiar texto={CORREO} />
         </div>
-        <h2>Otras formas</h2>
+        <h2><IconoPixel nombre="cursor" tam={2} />Otras formas</h2>
         <ul className="lista-resultado">
           <li>
             Por LinkedIn: <a href="https://www.linkedin.com/in/hirodrigoarancibia" rel="noopener">linkedin.com/in/hirodrigoarancibia</a>

@@ -52,9 +52,11 @@ export function LogVivo({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="historial-grid">
-      <ol className="log" ref={ref} data-activa={activa} aria-label="Historial de proyectos y trayectoria">
-        {children}
-      </ol>
+      <div className="panel-texto">
+        <ol className="log" ref={ref} data-activa={activa} aria-label="Historial de proyectos y trayectoria">
+          {children}
+        </ol>
+      </div>
       <aside className="ramas" aria-label="Ramas de la trayectoria">
         <h2>Ramas</h2>
         <ul>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { IconoPixel } from "@/components/IconoPixel";
 
 export function Copiar({ texto }: { texto: string }) {
   const [estado, setEstado] = useState<"listo" | "copiado" | "error">("listo");
@@ -19,7 +19,7 @@ export function Copiar({ texto }: { texto: string }) {
         window.setTimeout(() => setEstado("listo"), 2200);
       }}
     >
-      {estado === "copiado" ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+      <IconoPixel nombre={estado === "copiado" ? "check" : "copiar"} tam={2} />
       <span aria-live="polite">
         {estado === "copiado" ? "Copiado" : estado === "error" ? "No se pudo copiar: selecciónelo" : "Copiar correo"}
       </span>

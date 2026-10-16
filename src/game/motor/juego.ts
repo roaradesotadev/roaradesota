@@ -63,6 +63,7 @@ export class Juego {
   private destruido = false;
   private listo = false;
   private graficos: "paquete" | "procedural" = "procedural";
+  private ondas: HTMLImageElement | null = null;
   private activo = false;
   private escala = 3;
   private vistaW = 240;
@@ -141,6 +142,7 @@ export class Juego {
       this.atlas = crearAtlasReal(hojasTiles);
       this.mapa = parsearMapa(this.def, this.atlas, construirEstampas(this.atlas, hojasTiles));
       this.graficos = "paquete";
+      this.ondas = hojasTiles.ripples;
     } catch (e) {
       // sin el paquete, el pueblo se dibuja en código
       console.warn("Gráficos del paquete no disponibles; se usa el dibujo en código.", e);
@@ -168,7 +170,7 @@ export class Juego {
   }
 
   private prerenderizar() {
-    const { ancho, alto, base, suelo, objetos, encima } = this.mapa;
+    const { ancho, alto, base, suelo, objetos, objetos2, encima } = this.mapa;
     const w = ancho * TILE;
     const h = alto * TILE;
     this.base = document.createElement("canvas");
@@ -185,6 +187,7 @@ export class Juego {
         if (base[i]) this.atlas.dibujar(cb, base[i] - 1, x * TILE, y * TILE);
         if (suelo[i]) this.atlas.dibujar(cb, suelo[i] - 1, x * TILE, y * TILE);
         if (objetos[i]) this.atlas.dibujar(cb, objetos[i] - 1, x * TILE, y * TILE);
+        if (objetos2[i]) this.atlas.dibujar(cb, objetos2[i] - 1, x * TILE, y * TILE);
         if (encima[i]) this.atlas.dibujar(ce, encima[i] - 1, x * TILE, y * TILE);
       }
     }
@@ -359,6 +362,17 @@ export class Juego {
     c.fillStyle = "#101518";
     c.fillRect(0, 0, this.vistaW, this.vistaH);
     c.drawImage(this.base, -cx, -cy);
+
+    // ondas sobre el estanque
+    if (this.ondas) {
+      const cuadro = Math.floor(this.reloj / 320) % 4;
+      for (const a of this.mapa.agua) {
+        const sx = a.x * TILE - cx;
+        const sy = a.y * TILE - cy;
+        if (sx < -TILE || sy < -TILE || sx > this.vistaW || sy > this.vistaH) continue;
+        c.drawImage(this.ondas, cuadro * TILE, 0, TILE, TILE, sx, sy, TILE, TILE);
+      }
+    }
 
     const entidades = [...this.npcs, this.jugador].sort((a, b) => a.py - b.py);
     for (const e of entidades) {

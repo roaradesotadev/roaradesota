@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { IconoPixel } from "@/components/IconoPixel";
 import { CASOS, caso as buscarCaso } from "@/content/casos";
 import { HISTORIAL, hash } from "@/content/historial";
 import { CasoVista } from "@/components/caso-vista";
@@ -28,9 +28,9 @@ export default async function PaginaCaso({ params }: PageProps<"/casos/[slug]">)
     <article>
       <header className="caso-cabeza">
         <div className="caso-riel" aria-hidden="true" />
-        <div>
+        <div className="ficha">
           <Link href={`/historial#${c.entrada}`} className="enlace-sec">
-            <ArrowLeft size={16} strokeWidth={2} aria-hidden="true" /> Volver al historial
+            <IconoPixel nombre="flecha_izquierda" tam={2} /> Volver al historial
           </Link>
           <h1>{c.titulo}</h1>
           <div className="meta-commit mono">
@@ -40,12 +40,12 @@ export default async function PaginaCaso({ params }: PageProps<"/casos/[slug]">)
           <CasoVista caso={c} diff={entrada?.diff} />
           <p style={{ marginTop: 40 }}>
             <Link href={`/casos/${siguiente.slug}`} className="ver-caso">
-              Siguiente caso: {siguiente.titulo} <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+              Siguiente caso: {siguiente.titulo} <IconoPixel nombre="flecha_derecha" tam={2} />
             </Link>
           </p>
           <div className="acciones">
             <Link className="boton" href="/hablemos">
-              Conversemos 30 minutos <ArrowRight size={18} strokeWidth={2} aria-hidden="true" />
+              Conversemos 30 minutos <IconoPixel nombre="flecha_derecha" tam={2} />
             </Link>
           </div>
         </div>

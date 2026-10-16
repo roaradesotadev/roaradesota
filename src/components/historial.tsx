@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { IconoPixel } from "@/components/IconoPixel";
 import { HISTORIAL, RAMAS, carrilesActivos, hash, type Entrada, type RamaId } from "@/content/historial";
 import { DiffProceso } from "./diff";
 import { LogVivo } from "./log-vivo";
@@ -82,7 +82,7 @@ function Fila({ entrada, i, ultimo }: { entrada: Entrada; i: number; ultimo: boo
             {entrada.diff && <DiffProceso diff={entrada.diff} />}
             {entrada.caso && (
               <Link className="ver-caso" href={`/casos/${entrada.caso}`}>
-                Ver el caso completo <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+                Ver el caso completo <IconoPixel nombre="flecha_derecha" tam={2} />
               </Link>
             )}
           </>

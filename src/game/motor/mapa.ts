@@ -10,8 +10,10 @@ export type MapaListo = {
   base: Uint16Array; // pasto bajo todo (índice del atlas + 1)
   suelo: Uint16Array; // lo que va sobre el pasto; 0 = nada
   objetos: Uint16Array;
+  objetos2: Uint16Array; // segunda capa, para estampas que se montan unas sobre otras (el bosque del borde)
   encima: Uint16Array;
   solido: Uint8Array;
+  agua: { x: number; y: number }[]; // casillas de agua, para animar las ondas
   hotspots: Map<string, HotspotFijo>;
 };
 
@@ -54,8 +56,10 @@ export function parsearMapa(def: MapaDef, atlas: Atlas, estampas: Record<string,
   const base = new Uint16Array(n);
   const suelo = new Uint16Array(n);
   const objetos = new Uint16Array(n);
+  const objetos2 = new Uint16Array(n);
   const encima = new Uint16Array(n);
   const solido = new Uint8Array(n);
+  const agua: { x: number; y: number }[] = [];
 
   const pastos = (() => {
     const d = def.leyenda["."];
@@ -68,9 +72,11 @@ export function parsearMapa(def: MapaDef, atlas: Atlas, estampas: Record<string,
     if (!d) throw new Error(`Mapa ${def.id}: carácter sin leyenda "${ch}" en ${x},${y}`);
     return d;
   };
-  const autoEn = (x: number, y: number, grupo: string) => {
+  // Un vecino cuenta como "del mismo conjunto" si es del grupo o de uno de los grupos a los que este se une.
+  const autoEn = (x: number, y: number, grupo: string, une: string[]) => {
     if (x < 0 || y < 0 || x >= ancho || y >= alto) return true; // fuera del mapa, el conjunto sigue
-    return def.leyenda[def.suelo[y][x]]?.auto === grupo;
+    const otro = def.leyenda[def.suelo[y][x]]?.auto;
+    return otro === grupo || (otro !== undefined && une.includes(otro));
   };
 
   for (let y = 0; y < alto; y++) {
@@ -84,8 +90,15 @@ export function parsearMapa(def: MapaDef, atlas: Atlas, estampas: Record<string,
       const ch = filaSuelo[x];
       const d = defDe(ch, x, y);
       if (d.auto) {
-        const s = sufijo(autoEn(x, y - 1, d.auto), autoEn(x + 1, y, d.auto), autoEn(x, y + 1, d.auto), autoEn(x - 1, y, d.auto));
+        const une = d.une ?? [];
+        const s = sufijo(
+          autoEn(x, y - 1, d.auto, une),
+          autoEn(x + 1, y, d.auto, une),
+          autoEn(x, y + 1, d.auto, une),
+          autoEn(x - 1, y, d.auto, une),
+        );
         suelo[i] = atlas.indice(`${d.auto}_${s}`) + 1;
+        if (d.auto === "agua") agua.push({ x, y });
       } else if (ch !== "." && d.tile) {
         const nombres = Array.isArray(d.tile) ? d.tile : [d.tile];
         suelo[i] = atlas.indice(nombres[variante(x, y, nombres.length)]) + 1;
@@ -113,7 +126,11 @@ export function parsearMapa(def: MapaDef, atlas: Atlas, estampas: Record<string,
         const y = c.y + r;
         if (x < 0 || y < 0 || x >= ancho || y >= alto) return;
         const i = y * ancho + x;
-        if (t !== null) objetos[i] = t + 1;
+        if (t !== null) {
+          // si la casilla ya tiene un objeto, el nuevo se monta encima (segunda capa)
+          if (objetos[i]) objetos2[i] = t + 1;
+          else objetos[i] = t + 1;
+        }
         const enc = e.encima?.[r]?.[col];
         if (enc !== undefined && enc !== null) encima[i] = enc + 1;
         if (e.solido[r]?.[col]) solido[i] = 1;
@@ -124,5 +141,5 @@ export function parsearMapa(def: MapaDef, atlas: Atlas, estampas: Record<string,
   const hotspots = new Map<string, HotspotFijo>();
   for (const h of def.hotspots) hotspots.set(clave(h.x, h.y), h);
 
-  return { def, ancho, alto, base, suelo, objetos, encima, solido, hotspots };
+  return { def, ancho, alto, base, suelo, objetos, objetos2, encima, solido, agua, hotspots };
 }
