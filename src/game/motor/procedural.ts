@@ -300,6 +300,17 @@ export function crearAtlasProcedural(): Atlas {
     p.rect(5, 4, 6, 12, PAL.puerta);
     p.px(9, 10, "#f0d060");
   });
+  a.registrar("aviso", (p) => {
+    // globo de "…" sobre quien se puede hablar
+    p.rect(3, 5, 10, 9, PAL.tinta);
+    p.rect(4, 6, 8, 7, "#ffffff");
+    p.rect(6, 14, 3, 1, PAL.tinta);
+    p.px(7, 14, "#ffffff");
+    p.px(7, 15, PAL.tinta);
+    p.px(5, 9, PAL.tinta);
+    p.px(7, 9, PAL.tinta);
+    p.px(9, 9, PAL.tinta);
+  });
   a.registrar("puerta_lab", (p) => {
     p.fondo(PAL.pared);
     p.rect(4, 3, 8, 13, PAL.metalOsc);

@@ -9,7 +9,6 @@ export function Hud({ puente }: { puente: Puente }) {
   const estado = useEstadoJuego(puente);
   return (
     <div className="hud">
-      <span className="hud-nombre">Rodrigo Arancibia</span>
       <div className="hud-acciones">
         {estado.fase === "jugando" && (
           <button

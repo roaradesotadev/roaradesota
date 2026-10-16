@@ -152,7 +152,7 @@ export const DIALOGOS = {
 
   buzon: (): Dialogo => ({
     hablante: "Buzón",
-    paginas: [`Aquí puede escribirle a Rodrigo: ${CORREO}. Responde en un día hábil o dos.`, "También puede bajar su CV o leer todo en modo texto."],
+    paginas: [`Aquí puede escribirle a Rodrigo: ${CORREO}.`, "También puede bajar su CV o leer todo en modo texto."],
     opciones: [
       { texto: "Escribir un correo", accion: { tipo: "enlace", href: `mailto:${CORREO}?subject=${encodeURIComponent("Conversemos 30 minutos")}` } },
       { texto: "Bajar el CV", accion: { tipo: "enlace", href: "/cv/CV_Rodrigo_Arancibia.pdf" } },

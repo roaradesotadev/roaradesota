@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import type { Puente } from "../puente";
 import { useEstadoJuego } from "./usePuente";
 
@@ -16,17 +17,17 @@ export function PantallaTitulo({ puente }: { puente: Puente }) {
       <div className="titulo-caja">
         <h1>Rodrigo Arancibia</h1>
         <p>
-          Automatización de procesos, datos e IA aplicada. Este portafolio es un pueblo: cada edificio es un lugar donde
-          trabajé, y la gente le cuenta qué hice ahí.
+          Un pueblo para recorrer mi trabajo en automatización de procesos, datos e IA: cada edificio es un lugar donde
+          trabajé y la gente le cuenta qué hice ahí.
         </p>
         <button type="button" className="titulo-jugar" onClick={jugar} autoFocus>
           Jugar
         </button>
-        <p className="titulo-ayuda parpadeo" aria-hidden="true">
+        <p className="titulo-ayuda">
           {estado.tactil ? "Cruceta para caminar · A para hablar" : "Flechas para caminar · Espacio para hablar"}
         </p>
         <Link className="titulo-texto" href="/historial">
-          Prefiero leer: modo texto →
+          Prefiero leer: modo texto <ArrowRight size={17} strokeWidth={2.5} aria-hidden="true" />
         </Link>
       </div>
     </div>

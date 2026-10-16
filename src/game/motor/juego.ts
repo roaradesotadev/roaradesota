@@ -70,6 +70,7 @@ export class Juego {
   private tAgua = 0;
   private accionPendiente = false;
   private tMirada = 2000;
+  private aviso = 0;
   private quitarOyentes: (() => void)[] = [];
 
   constructor(
@@ -88,6 +89,7 @@ export class Juego {
 
   iniciar() {
     this.atlas = crearAtlasProcedural();
+    this.aviso = this.atlas.indice("aviso");
     const estampas = construirEstampas(this.atlas);
     this.mapa = parsearMapa(this.def, this.atlas, estampas);
     this.prerenderizar();
@@ -355,6 +357,19 @@ export class Juego {
     }
 
     c.drawImage(this.capaEncima, -cx, -cy);
+
+    // globo sobre lo que tiene al frente: así se ve con quién se puede hablar
+    const j = this.jugador;
+    if (this.activo && !j.moviendo && !this.puente.leer().dialogo) {
+      const d = DELTA[j.dir];
+      const tx = j.x + d.x;
+      const ty = j.y + d.y;
+      const hay = this.npcs.some((n) => n.x === tx && n.y === ty) || this.mapa.hotspots.has(clave(tx, ty));
+      if (hay) {
+        const bob = Math.round(Math.sin(this.tAgua / 220));
+        this.atlas.dibujar(c, this.aviso, tx * TILE - cx, ty * TILE - 14 - cy + bob);
+      }
+    }
 
     if (this.opciones.grilla) {
       c.strokeStyle = "rgba(255,255,255,0.15)";

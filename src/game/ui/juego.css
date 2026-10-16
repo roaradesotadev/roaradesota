@@ -50,19 +50,13 @@
   left: 12px;
   right: 12px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   gap: 12px;
   pointer-events: none;
 }
 .hud > * {
   pointer-events: auto;
-}
-.hud-nombre {
-  font-family: var(--font-pixel-rotulo), monospace;
-  font-size: 11px;
-  color: #e7ecea;
-  text-shadow: 2px 2px 0 var(--j-fondo);
 }
 .hud-acciones {
   display: flex;
@@ -149,12 +143,14 @@
   box-shadow: inset 0 0 0 2px var(--j-verde-claro), 2px 2px 0 #0b0e10;
 }
 .titulo-ayuda {
-  margin: 18px 0 0;
+  margin: 24px 0 0;
   font-size: 15px;
   color: #5b6670;
 }
 .titulo-texto {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin-top: 14px;
   font-size: 17px;
   color: var(--j-tinta-2);
@@ -267,13 +263,14 @@
   height: 150px;
   pointer-events: auto;
   touch-action: none;
+  filter: drop-shadow(3px 3px 0 #0b0e10); /* una sola sombra dura para toda la cruz, como en los demás controles */
 }
 .cruceta button,
 .cruceta-centro {
   position: absolute;
   width: 50px;
   height: 50px;
-  background: rgba(244, 247, 245, 0.9);
+  background: var(--j-papel);
   border: 3px solid var(--j-tinta);
   box-shadow: inset 0 0 0 2px #fff;
 }
@@ -293,6 +290,7 @@
 .cruceta-centro {
   left: 50px;
   top: 50px;
+  border-color: var(--j-papel);
   box-shadow: none;
 }
 [data-dpad="arriba"] {
@@ -357,9 +355,6 @@
   }
   .dialogo-nombre {
     font-size: 14px;
-  }
-  .hud-nombre {
-    display: none;
   }
 }
 
