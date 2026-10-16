@@ -6,14 +6,14 @@ import type { Puente } from "../puente";
 import { useEstadoJuego } from "./usePuente";
 
 // Pantalla de título: se renderiza en el servidor (nombre y texto indexables) y da el primer gesto del usuario.
-export function PantallaTitulo({ puente }: { puente: Puente }) {
+export function PantallaTitulo({ puente, saliendo = false }: { puente: Puente; saliendo?: boolean }) {
   const estado = useEstadoJuego(puente);
   const jugar = () => {
     puente.actualizar({ fase: "jugando" });
     puente.emit("juego:fase", { fase: "jugando" });
   };
   return (
-    <div className="titulo">
+    <div className={`titulo${saliendo ? " saliendo" : ""}`} aria-hidden={saliendo || undefined}>
       <div className="titulo-caja">
         <h1>Rodrigo Arancibia</h1>
         <p>

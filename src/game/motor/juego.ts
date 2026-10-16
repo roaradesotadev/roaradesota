@@ -71,6 +71,7 @@ export class Juego {
   private accionPendiente = false;
   private tMirada = 2000;
   private aviso = 0;
+  private tTope = -260; // > 0 mientras dura el empujón contra un obstáculo; baja hasta -260 (pausa)
   private quitarOyentes: (() => void)[] = [];
 
   constructor(
@@ -252,12 +253,15 @@ export class Juego {
             j.oy = j.py;
             j.dx = nx;
             j.dy = ny;
+          } else if (this.tTope <= -260) {
+            this.tTope = 140; // empujón corto, y una pausa antes del siguiente
           }
         }
       } else {
         this.tGiro = 0;
       }
     }
+    if (this.tTope > -260) this.tTope -= dt;
 
     if (j.moviendo) {
       const dur = this.entrada.corre() ? 120 : 210;
@@ -350,8 +354,13 @@ export class Juego {
 
     const entidades = [...this.npcs, this.jugador].sort((a, b) => a.py - b.py);
     for (const e of entidades) {
-      const sx = Math.round(e.px - cx);
-      const sy = Math.round(e.py - cy) - 4; // la cabeza asoma sobre la casilla
+      let sx = Math.round(e.px - cx);
+      let sy = Math.round(e.py - cy) - 4; // la cabeza asoma sobre la casilla
+      if (e === this.jugador && this.tTope > 70) {
+        // un píxel hacia el obstáculo durante el empujón
+        sx += DELTA[e.dir].x;
+        sy += DELTA[e.dir].y;
+      }
       if (sx < -TILE || sy < -20 || sx > this.vistaW || sy > this.vistaH) continue;
       c.drawImage(e.hoja.imagen, this.cuadroDe(e) * 16, FILA_DIR[e.dir] * 20, 16, 20, sx, sy, 16, 20);
     }

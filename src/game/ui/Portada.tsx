@@ -23,6 +23,14 @@ export function Portada() {
     puente.actualizar({ tactil });
   }, [puente]);
 
+  // el título se desvanece en pasos (como en GBA) y recién después se desmonta
+  const [tituloVisible, setTituloVisible] = useState(true);
+  useEffect(() => {
+    if (estado.fase !== "jugando") return;
+    const t = window.setTimeout(() => setTituloVisible(false), 420);
+    return () => window.clearTimeout(t);
+  }, [estado.fase]);
+
   const conMando = estado.fase === "jugando" && estado.tactil;
 
   return (
@@ -31,7 +39,7 @@ export function Portada() {
       <Hud puente={puente} />
       {conMando && <Dpad puente={puente} />}
       <CajaDialogo puente={puente} />
-      {estado.fase === "titulo" && <PantallaTitulo puente={puente} />}
+      {tituloVisible && <PantallaTitulo puente={puente} saliendo={estado.fase === "jugando"} />}
     </div>
   );
 }

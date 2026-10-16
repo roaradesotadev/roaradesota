@@ -101,6 +101,15 @@
   padding: 16px;
   background: rgba(16, 21, 24, 0.72);
 }
+.titulo.saliendo {
+  pointer-events: none;
+  animation: desvanecer 0.4s steps(4, end) forwards;
+}
+@keyframes desvanecer {
+  to {
+    opacity: 0;
+  }
+}
 .titulo-caja {
   width: min(560px, 100%);
   padding: 28px 24px 24px;
