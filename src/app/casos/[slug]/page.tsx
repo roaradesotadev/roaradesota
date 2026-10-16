@@ -1,0 +1,55 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { CASOS, caso as buscarCaso } from "@/content/casos";
+import { HISTORIAL, hash } from "@/content/historial";
+import { CasoVista } from "@/components/caso-vista";
+
+export function generateStaticParams() {
+  return CASOS.map((c) => ({ slug: c.slug }));
+}
+
+export async function generateMetadata({ params }: PageProps<"/casos/[slug]">): Promise<Metadata> {
+  const { slug } = await params;
+  const c = buscarCaso(slug);
+  return c ? { title: c.titulo, description: c.bajada } : {};
+}
+
+export default async function PaginaCaso({ params }: PageProps<"/casos/[slug]">) {
+  const { slug } = await params;
+  const c = buscarCaso(slug);
+  if (!c) notFound();
+  const entrada = HISTORIAL.find((e) => e.id === c.entrada);
+  const i = CASOS.findIndex((x) => x.slug === c.slug);
+  const siguiente = CASOS[(i + 1) % CASOS.length];
+
+  return (
+    <article>
+      <header className="caso-cabeza">
+        <div className="caso-riel" aria-hidden="true" />
+        <div>
+          <Link href={`/#${c.entrada}`} className="enlace-sec">
+            <ArrowLeft size={16} strokeWidth={2} aria-hidden="true" /> Volver al historial
+          </Link>
+          <h1>{c.titulo}</h1>
+          <div className="meta-commit mono">
+            {hash(c.entrada)} · {entrada?.fecha}
+          </div>
+          <p className="bajada">{c.bajada}</p>
+          <CasoVista caso={c} diff={entrada?.diff} />
+          <p style={{ marginTop: 40 }}>
+            <Link href={`/casos/${siguiente.slug}`} className="ver-caso">
+              Siguiente caso: {siguiente.titulo} <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+            </Link>
+          </p>
+          <div className="acciones">
+            <Link className="boton" href="/hablemos">
+              Conversemos 30 minutos <ArrowRight size={18} strokeWidth={2} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </header>
+    </article>
+  );
+}
