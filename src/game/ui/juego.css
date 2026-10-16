@@ -13,7 +13,7 @@
   overflow: hidden;
   background: var(--j-fondo);
   color: var(--j-papel);
-  font-family: var(--font-pixel), var(--font-grotesk), sans-serif;
+  font-family: var(--font-pixel), sans-serif;
 }
 
 .lienzo {
@@ -121,7 +121,7 @@
 }
 .titulo h1 {
   font-family: var(--font-pixel-rotulo), monospace;
-  font-size: clamp(15px, 4vw, 24px);
+  font-size: clamp(16px, 4vw, 24px);
   line-height: 1.5;
   letter-spacing: 0.01em;
   margin: 0 0 14px;
@@ -136,7 +136,7 @@
 .titulo-jugar {
   font: inherit;
   font-family: var(--font-pixel-rotulo), monospace;
-  font-size: 14px;
+  font-size: 16px;
   padding: 14px 26px;
   background: var(--j-verde);
   color: #fff;
@@ -414,11 +414,6 @@
   }
 }
 
-.sin-js {
-  padding: 24px;
-  max-width: 60ch;
-  font-family: var(--font-grotesk), sans-serif;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .parpadeo,

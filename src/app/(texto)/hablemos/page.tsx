@@ -13,7 +13,6 @@ const ASUNTO = encodeURIComponent("Conversemos 30 minutos");
 export default function Hablemos() {
   return (
     <div className="pagina">
-      <div aria-hidden="true" />
       <div className="ficha">
         <h1>Conversemos 30 minutos</h1>
         <p className="bajada">

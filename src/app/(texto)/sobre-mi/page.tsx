@@ -11,7 +11,6 @@ export const metadata: Metadata = {
 export default function SobreMi() {
   return (
     <div className="pagina">
-      <div aria-hidden="true" />
       <div className="ficha">
         <h1>Sobre mí</h1>
         <p className="bajada">{PERFIL_RESUMEN}</p>

@@ -71,10 +71,8 @@ export function LogVivo({ children }: { children: React.ReactNode }) {
                   style={{ "--c": r.color } as React.CSSProperties}
                 >
                   <span className="punto-rama" aria-hidden="true" />
-                  <span className="nombre-rama mono">{r.nombre}</span>
-                  <span className="sector-rama">
-                    {id === "main" ? "Rodrigo Arancibia" : r.sector}, {PERIODO[id]}
-                  </span>
+                  <span className="nombre-rama">{id === "main" ? "Rama principal" : r.sector}</span>
+                  <span className="sector-rama">{id === "main" ? `Rodrigo Arancibia, ${PERIODO[id]}` : PERIODO[id]}</span>
                 </a>
               </li>
             );

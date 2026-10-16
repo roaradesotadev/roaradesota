@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { IconoPixel } from "@/components/IconoPixel";
-import { HISTORIAL, RAMAS, carrilesActivos, hash, type Entrada, type RamaId } from "@/content/historial";
+import { HISTORIAL, RAMAS, carrilesActivos, type Entrada, type RamaId } from "@/content/historial";
 import { DiffProceso } from "./diff";
 import { LogVivo } from "./log-vivo";
 
@@ -63,7 +63,7 @@ function Fila({ entrada, i, ultimo }: { entrada: Entrada; i: number; ultimo: boo
       <div className="fila-cuerpo">
         {compacta ? (
           <p className="titulo-commit">
-            {entrada.titulo} · {entrada.fecha} · <span className="hash">{hash(entrada.id)}</span>
+            {entrada.titulo} · {entrada.fecha}
           </p>
         ) : (
           <>
@@ -72,10 +72,8 @@ function Fila({ entrada, i, ultimo }: { entrada: Entrada; i: number; ultimo: boo
             ) : (
               <h3 className="titulo-commit">{entrada.titulo}</h3>
             )}
-            <div className="meta-commit mono">
-              <span className="hash">{hash(entrada.id)}</span>
-              {esHead && <span className="ref"> · HEAD → main</span>}
-              {" · "}
+            <div className="meta-commit">
+              {esHead && <span className="ref">Lo más reciente · </span>}
               {entrada.rama === "main" ? entrada.fecha : `${entrada.fecha} · ${rama.sector}`}
             </div>
             {entrada.detalle && <p className="detalle-commit">{entrada.detalle}</p>}

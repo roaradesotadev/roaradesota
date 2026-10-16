@@ -6,7 +6,6 @@ export default function Inicio() {
   return (
     <>
       <section className="portada" aria-labelledby="nombre">
-        <div className="portada-riel" aria-hidden="true" />
         <div className="portada-caja">
           <h1 id="nombre">Rodrigo Arancibia</h1>
           <p className="posicion">

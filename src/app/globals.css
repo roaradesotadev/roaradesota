@@ -4,7 +4,7 @@
    Cajas de papel con borde de 4 px, línea blanca interior y sombra dura; Pixelify para leer,
    Press Start 2P para rótulos cortos; el color vive en los rieles de las ramas. */
 :root {
-  --fondo: #6fb24a;
+  --fondo: #adbc3a; /* el mismo oliva del pasto, por si el mosaico tarda */
   --fondo-alto: #f4f7f5;
   --papel: #f4f7f5;
   --tinta: #14181b;
@@ -51,18 +51,18 @@
 }
 
 html {
-  background: var(--fondo);
+  background: var(--fondo) url("/juego/fondo-pasto.png") repeat;
+  background-size: 192px 192px;
+  image-rendering: pixelated;
   color: var(--tinta);
   scrollbar-color: var(--tinta) var(--papel);
   -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--fondo) url("/juego/fondo-pasto.png") repeat;
-  background-size: 192px 192px;
-  image-rendering: pixelated;
+  min-height: 100dvh;
   color: var(--tinta);
-  font-family: var(--font-pixel), var(--font-grotesk), system-ui, sans-serif;
+  font-family: var(--font-pixel), system-ui, sans-serif;
   font-size: 1.125rem;
   line-height: 1.5;
   text-rendering: optimizeLegibility;
@@ -105,14 +105,12 @@ p {
 
 .rotulo,
 .mono,
-.hash,
-.ref,
 .meta-commit,
 .diff-cabeza {
-  font-family: var(--font-pixel-rotulo), monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.02em;
-  line-height: 1.7;
+  font-family: var(--font-pixel), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 /* ---------- la caja pixel ---------- */
@@ -157,7 +155,7 @@ main {
 }
 .cabecera .nombre-corto {
   font-family: var(--font-pixel-rotulo), monospace;
-  font-size: 0.78rem;
+  font-size: 1rem;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -197,15 +195,22 @@ main {
 .nav a:first-child:hover {
   background: #f8d26a;
 }
+@media (max-width: 640px) {
+  .cabecera {
+    justify-content: center;
+    padding: 12px 14px;
+  }
+  .nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+  .nav a {
+    justify-content: center;
+  }
+}
 
 /* ---------- Portada del historial ---------- */
-.portada {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-.portada-riel {
-  display: none;
-}
 .portada-caja {
   padding: clamp(22px, 4vw, 40px) clamp(20px, 4vw, 44px) clamp(22px, 3vw, 34px);
 }
@@ -213,10 +218,17 @@ main {
 .pagina h1,
 .caso-cabeza h1 {
   font-family: var(--font-pixel-rotulo), monospace;
-  font-size: clamp(1.05rem, 3.2vw, 1.75rem);
+  font-size: 1.5rem; /* 24 px: múltiplo del píxel de la fuente */
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.6;
   margin: 0;
+}
+@media (max-width: 640px) {
+  .portada h1,
+  .pagina h1,
+  .caso-cabeza h1 {
+    font-size: 1rem;
+  }
 }
 .posicion,
 .bajada {
@@ -237,11 +249,11 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 18px;
+  padding: 11px 18px;
   background: var(--verde);
   color: #fff;
-  font-family: var(--font-pixel-rotulo), monospace;
-  font-size: 0.7rem;
+  font-weight: 700;
+  font-size: 1.05rem;
   line-height: 1.4;
   text-decoration: none;
   border: 3px solid var(--tinta);
@@ -290,7 +302,7 @@ main {
 }
 .ramas h2 {
   font-family: var(--font-pixel-rotulo), monospace;
-  font-size: 0.65rem;
+  font-size: 1rem;
   font-weight: 400;
   margin: 0 0 10px;
 }
@@ -315,7 +327,8 @@ main {
   background: color-mix(in srgb, var(--c) 45%, var(--papel));
 }
 .ramas .nombre-rama {
-  font-size: 0.55rem;
+  font-size: 0.95rem;
+  color: var(--tinta-2);
 }
 .ramas .sector-rama {
   grid-column: 2;
@@ -414,10 +427,9 @@ main {
   transition: color 0.5s var(--ease);
 }
 .fila-compacta .titulo-commit {
-  font-family: var(--font-pixel-rotulo), monospace;
-  font-size: 0.58rem;
-  font-weight: 400;
-  line-height: 1.8;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
   color: var(--tinta-3);
 }
 .ver-caso {
@@ -467,8 +479,8 @@ main {
   text-align: center;
   font-weight: 700;
   font-family: var(--font-pixel-rotulo), monospace;
-  font-size: 0.7rem;
-  line-height: 1.9;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 .diff-menos {
   background: var(--menos-fondo);
@@ -505,13 +517,6 @@ main {
 }
 
 /* ---------- Ficha de un caso ---------- */
-.caso-cabeza {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-.caso-riel {
-  display: none;
-}
 .ficha {
   padding: clamp(20px, 4vw, 36px) clamp(18px, 4vw, 40px) clamp(20px, 3vw, 30px);
 }
@@ -554,7 +559,7 @@ main {
   align-items: center;
   gap: 10px;
   font-family: var(--font-pixel-rotulo), monospace;
-  font-size: 0.78rem;
+  font-size: 1rem;
   font-weight: 400;
   line-height: 1.6;
   margin: 40px 0 14px;
@@ -595,8 +600,8 @@ main {
   top: 10px;
   color: var(--mas);
   font-family: var(--font-pixel-rotulo), monospace;
-  font-size: 0.75rem;
-  line-height: 1.9;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .num {
@@ -606,9 +611,8 @@ main {
   height: 1.5em;
   border: 2px solid var(--verde);
   color: var(--verde);
-  font-family: var(--font-pixel-rotulo), monospace;
-  font-size: 0.55em;
-  font-weight: 400;
+  font-weight: 700;
+  font-size: 0.8em;
   vertical-align: 0.1em;
   margin-inline: 1px;
   background: #fff;
@@ -626,9 +630,9 @@ main {
   border-bottom: 2px solid var(--linea);
 }
 .piezas .num {
-  font-size: 0.6rem;
-  width: 2.4em;
-  height: 2.4em;
+  font-size: 1rem;
+  width: 2.1em;
+  height: 2.1em;
 }
 .piezas strong {
   color: var(--tinta);
@@ -706,8 +710,13 @@ main {
 }
 .recreacion-rotulo {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
+  gap: 2px 14px;
   color: #9aa7a2;
+}
+.recreacion-rotulo span {
+  white-space: nowrap;
 }
 .burbuja-orden {
   margin-top: 14px;
@@ -751,13 +760,6 @@ main {
 }
 
 /* ---------- Sobre mí y Hablemos (fichas) ---------- */
-.pagina {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-.pagina > div:first-child {
-  display: none;
-}
 .tabla-trayectoria {
   list-style: none;
   margin: 0;
@@ -852,6 +854,7 @@ main {
   margin: 24px;
   padding: 24px;
   max-width: 60ch;
+  font-family: var(--font-pixel), sans-serif;
   background: var(--papel);
   border: 4px solid var(--tinta);
   box-shadow: inset 0 0 0 3px #fff, 6px 6px 0 var(--sombra);

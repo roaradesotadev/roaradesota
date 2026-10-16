@@ -3,8 +3,21 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { IconoPixel } from "@/components/IconoPixel";
 import { CASOS, caso as buscarCaso } from "@/content/casos";
-import { HISTORIAL, hash } from "@/content/historial";
+import { HISTORIAL } from "@/content/historial";
 import { CasoVista } from "@/components/caso-vista";
+
+// Press Start 2P es monoespaciada: los dos puntos dejan un hueco doble, así que el título se parte ahí.
+function partirTitulo(titulo: string) {
+  const i = titulo.indexOf(":");
+  if (i === -1) return titulo;
+  return (
+    <>
+      {titulo.slice(0, i + 1)}
+      <br />
+      {titulo.slice(i + 1).trim()}
+    </>
+  );
+}
 
 export function generateStaticParams() {
   return CASOS.map((c) => ({ slug: c.slug }));
@@ -27,15 +40,12 @@ export default async function PaginaCaso({ params }: PageProps<"/casos/[slug]">)
   return (
     <article>
       <header className="caso-cabeza">
-        <div className="caso-riel" aria-hidden="true" />
         <div className="ficha">
           <Link href={`/historial#${c.entrada}`} className="enlace-sec">
             <IconoPixel nombre="flecha_izquierda" tam={2} /> Volver al historial
           </Link>
-          <h1>{c.titulo}</h1>
-          <div className="meta-commit mono">
-            {hash(c.entrada)} · {entrada?.fecha}
-          </div>
+          <h1>{partirTitulo(c.titulo)}</h1>
+          <div className="meta-commit">{entrada?.fecha}</div>
           <p className="bajada">{c.bajada}</p>
           <CasoVista caso={c} diff={entrada?.diff} />
           <p style={{ marginTop: 40 }}>

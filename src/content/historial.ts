@@ -83,7 +83,7 @@ export const HISTORIAL: Entrada[] = [
     rama: "banca",
     tipo: "merge",
     fecha: "abr. 2026",
-    titulo: "Merge de banca-y-seguros en main",
+    titulo: "Termina la etapa en banca y seguros",
   },
   {
     id: "intnova",
@@ -115,14 +115,14 @@ export const HISTORIAL: Entrada[] = [
     rama: "banca",
     tipo: "fork",
     fecha: "dic. 2024",
-    titulo: "Nueva rama: banca-y-seguros",
+    titulo: "Empieza la etapa en banca y seguros",
   },
   {
     id: "merge-inmobiliaria",
     rama: "inmobiliaria",
     tipo: "merge",
     fecha: "dic. 2024",
-    titulo: "Merge de inmobiliaria en main",
+    titulo: "Termina la etapa en la inmobiliaria",
   },
   {
     id: "datawarehouse",
@@ -138,14 +138,14 @@ export const HISTORIAL: Entrada[] = [
     rama: "inmobiliaria",
     tipo: "fork",
     fecha: "jul. 2024",
-    titulo: "Nueva rama: inmobiliaria",
+    titulo: "Empieza la etapa en la inmobiliaria",
   },
   {
     id: "merge-consultoria",
     rama: "consultoria",
     tipo: "merge",
     fecha: "jul. 2024",
-    titulo: "Merge de consultora-internacional en main",
+    titulo: "Termina la etapa en la consultora internacional",
   },
   {
     id: "datos-maestros",
@@ -160,14 +160,14 @@ export const HISTORIAL: Entrada[] = [
     rama: "consultoria",
     tipo: "fork",
     fecha: "abr. 2024",
-    titulo: "Nueva rama: consultora-internacional",
+    titulo: "Empieza la etapa en la consultora internacional",
   },
   {
     id: "merge-mineria",
     rama: "mineria",
     tipo: "merge",
     fecha: "mar. 2024",
-    titulo: "Merge de grupo-minero en main",
+    titulo: "Termina la etapa en el grupo minero",
   },
   {
     id: "rpa",
@@ -183,7 +183,7 @@ export const HISTORIAL: Entrada[] = [
     rama: "mineria",
     tipo: "fork",
     fecha: "ago. 2022",
-    titulo: "Nueva rama: grupo-minero",
+    titulo: "Empieza la etapa en el grupo minero",
   },
   {
     id: "ieee",
