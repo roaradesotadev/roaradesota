@@ -144,6 +144,7 @@
 }
 .titulo .titulo-ayuda {
   margin: 26px auto 0; /* más específico que `.titulo p`, que pone el margen superior en 0 */
+  max-width: none;
   font-size: 15px;
   color: #5b6670;
 }
