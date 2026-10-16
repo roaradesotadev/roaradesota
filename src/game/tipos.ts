@@ -7,8 +7,9 @@ export type Vec = { x: number; y: number };
 
 export type Capa = "suelo" | "objetos" | "encima";
 
-// Un carácter del mapa ASCII. `tile` nombra un dibujo del atlas; con varios, se elige uno por posición.
-export type DefTile = { tile: string | string[]; solido?: boolean; anim?: string[]; capa?: Capa };
+// Un carácter del mapa ASCII. `tile` nombra un dibujo del atlas (con varios, se elige uno por posición);
+// `auto` nombra un conjunto con bordes (camino, agua, plaza) que se resuelve mirando a los vecinos.
+export type DefTile = { tile?: string | string[]; auto?: string; solido?: boolean; capa?: Capa };
 export type Leyenda = Record<string, DefTile>;
 
 // Un edificio u objeto de varios tiles, ya resuelto a índices del atlas.
@@ -23,7 +24,7 @@ export type Opcion = {
   texto: string;
   accion: { tipo: "ir"; href: string } | { tipo: "enlace"; href: string } | { tipo: "cerrar" };
 };
-export type Dialogo = { hablante?: string; paginas: string[]; opciones?: Opcion[] };
+export type Dialogo = { hablante?: string; retrato?: string; paginas: string[]; opciones?: Opcion[] };
 
 export type Npc = {
   id: string;
@@ -48,6 +49,14 @@ export type MapaDef = {
   hotspots: HotspotFijo[];
   npcs: Npc[];
   inicio: Vec & { dir: Direccion };
+};
+
+// Hoja de un personaje: sabe qué recorte dibujar según la dirección y el paso.
+export type Celda = { sx: number; sy: number; w: number; h: number };
+export type HojaPersonaje = {
+  imagen: CanvasImageSource;
+  offsetY: number; // cuánto sube el dibujo respecto de la casilla (cabezas que asoman)
+  celda: (dir: Direccion, moviendo: boolean, t: number, pie: 0 | 1) => Celda;
 };
 
 export type Fase = "titulo" | "jugando";

@@ -1,7 +1,8 @@
 // El motor: lienzo con escala entera, bucle, cámara, jugador por casillas, personajes e interacción.
-import { TILE, type Dialogo, type Direccion, type MapaDef, type Npc, type Vec } from "../tipos";
+import { TILE, type Dialogo, type Direccion, type HojaPersonaje, type MapaDef, type Npc, type Vec } from "../tipos";
 import type { Puente } from "../puente";
-import { APARIENCIAS, FILA_DIR, crearAtlasProcedural, crearHojaPersonaje, type Atlas, type HojaPersonaje } from "./procedural";
+import { APARIENCIAS, crearAtlasProcedural, crearHojaProcedural, type Atlas } from "./procedural";
+import { cargarHojaReal, cargarHojas, crearAtlasReal, retratoDe, PERSONAJES_REALES } from "./recursos";
 import { clave, parsearMapa, type MapaListo } from "./mapa";
 import { Entrada } from "./entrada";
 import { construirEstampas } from "../datos/estampas";
@@ -40,7 +41,7 @@ export type OpcionesJuego = { debug?: boolean; grilla?: boolean };
 
 export type DebugJuego = {
   posicion: () => { x: number; y: number; dir: Direccion; px: number; py: number };
-  estado: () => { fase: string; dialogo: boolean; escala: number; vista: Vec };
+  estado: () => { fase: string; dialogo: boolean; escala: number; vista: Vec; graficos: "paquete" | "procedural" };
   teletransportar: (x: number, y: number, dir?: Direccion) => void;
   hablar: () => void;
   abrirDialogo: (npcId: string) => void;
@@ -55,19 +56,20 @@ export class Juego {
   private jugador!: Entidad;
   private npcs: Entidad[] = [];
   private npcDefs = new Map<string, Npc>();
-  private hojas = new Map<string, HojaPersonaje>();
   private entrada: Entrada;
   private observador?: ResizeObserver;
   private raf = 0;
   private ultimo = 0;
   private destruido = false;
+  private listo = false;
+  private graficos: "paquete" | "procedural" = "procedural";
   private activo = false;
   private escala = 3;
   private vistaW = 240;
   private vistaH = 160;
   private cam: Vec = { x: 0, y: 0 };
   private tGiro = 0;
-  private tAgua = 0;
+  private reloj = 0;
   private accionPendiente = false;
   private tMirada = 2000;
   private aviso = 0;
@@ -89,18 +91,6 @@ export class Juego {
   }
 
   iniciar() {
-    this.atlas = crearAtlasProcedural();
-    this.aviso = this.atlas.indice("aviso");
-    const estampas = construirEstampas(this.atlas);
-    this.mapa = parsearMapa(this.def, this.atlas, estampas);
-    this.prerenderizar();
-
-    this.jugador = this.crearEntidad("jugador", "visitante", this.def.inicio.x, this.def.inicio.y, this.def.inicio.dir);
-    this.npcs = this.def.npcs.map((n) => {
-      this.npcDefs.set(n.id, n);
-      return this.crearEntidad(n.id, n.sprite, n.x, n.y, n.dir);
-    });
-
     this.entrada.montar();
     this.quitarOyentes.push(
       this.puente.on("entrada:dpad", ({ dir }) => {
@@ -115,17 +105,11 @@ export class Juego {
       }),
     );
     document.addEventListener("visibilitychange", this.alCambiarVisibilidad);
-
     this.observador = new ResizeObserver(() => this.redimensionar());
     this.observador.observe(this.contenedor);
     this.redimensionar();
-    this.camara();
     this.raf = requestAnimationFrame(this.cuadro);
-
-    if (this.opciones.debug) {
-      (window as unknown as { __juego: DebugJuego }).__juego = this.debug();
-    }
-    if (this.puente.leer().fase === "jugando") this.activar();
+    void this.cargar();
   }
 
   destruir() {
@@ -144,23 +128,47 @@ export class Juego {
     this.contenedor.focus({ preventScroll: true });
   }
 
-  // ---------- construcción ----------
+  // ---------- carga ----------
 
-  private hoja(sprite: string) {
-    let h = this.hojas.get(sprite);
-    if (!h) {
-      h = crearHojaPersonaje(APARIENCIAS[sprite] ?? APARIENCIAS.visitante);
-      this.hojas.set(sprite, h);
+  private async cargar() {
+    const hojas = new Map<string, HojaPersonaje>();
+    const sprites = Array.from(new Set(["visitante", ...this.def.npcs.map((n) => n.sprite)]));
+    try {
+      const hojasTiles = await cargarHojas();
+      const personajes = await Promise.all(sprites.map((s) => cargarHojaReal(s)));
+      if (this.destruido) return;
+      sprites.forEach((s, i) => hojas.set(s, personajes[i]));
+      this.atlas = crearAtlasReal(hojasTiles);
+      this.mapa = parsearMapa(this.def, this.atlas, construirEstampas(this.atlas, hojasTiles));
+      this.graficos = "paquete";
+    } catch (e) {
+      // sin el paquete, el pueblo se dibuja en código
+      console.warn("Gráficos del paquete no disponibles; se usa el dibujo en código.", e);
+      if (this.destruido) return;
+      this.atlas = crearAtlasProcedural();
+      this.mapa = parsearMapa(this.def, this.atlas, construirEstampas(this.atlas));
+      for (const s of sprites) hojas.set(s, crearHojaProcedural(APARIENCIAS[s] ?? APARIENCIAS.visitante));
+      this.graficos = "procedural";
     }
-    return h;
+    this.aviso = this.atlas.indice("aviso");
+    this.prerenderizar();
+    this.jugador = this.crearEntidad("jugador", hojas.get("visitante")!, this.def.inicio.x, this.def.inicio.y, this.def.inicio.dir);
+    this.npcs = this.def.npcs.map((n) => {
+      this.npcDefs.set(n.id, n);
+      return this.crearEntidad(n.id, hojas.get(n.sprite)!, n.x, n.y, n.dir);
+    });
+    this.listo = true;
+    this.camara();
+    if (this.opciones.debug) (window as unknown as { __juego: DebugJuego }).__juego = this.debug();
+    if (this.puente.leer().fase === "jugando") this.activar();
   }
 
-  private crearEntidad(id: string, sprite: string, x: number, y: number, dir: Direccion): Entidad {
-    return { id, x, y, px: x * TILE, py: y * TILE, dir, hoja: this.hoja(sprite), moviendo: false, t: 0, ox: 0, oy: 0, dx: x, dy: y, pie: 0 };
+  private crearEntidad(id: string, hoja: HojaPersonaje, x: number, y: number, dir: Direccion): Entidad {
+    return { id, x, y, px: x * TILE, py: y * TILE, dir, hoja, moviendo: false, t: 0, ox: 0, oy: 0, dx: x, dy: y, pie: 0 };
   }
 
   private prerenderizar() {
-    const { ancho, alto, suelo, objetos, encima } = this.mapa;
+    const { ancho, alto, base, suelo, objetos, encima } = this.mapa;
     const w = ancho * TILE;
     const h = alto * TILE;
     this.base = document.createElement("canvas");
@@ -174,6 +182,7 @@ export class Juego {
     for (let y = 0; y < alto; y++) {
       for (let x = 0; x < ancho; x++) {
         const i = y * ancho + x;
+        if (base[i]) this.atlas.dibujar(cb, base[i] - 1, x * TILE, y * TILE);
         if (suelo[i]) this.atlas.dibujar(cb, suelo[i] - 1, x * TILE, y * TILE);
         if (objetos[i]) this.atlas.dibujar(cb, objetos[i] - 1, x * TILE, y * TILE);
         if (encima[i]) this.atlas.dibujar(ce, encima[i] - 1, x * TILE, y * TILE);
@@ -200,7 +209,7 @@ export class Juego {
     this.ctx.setTransform(escalaDisp, 0, 0, escalaDisp, 0, 0);
     this.ctx.imageSmoothingEnabled = false;
     this.escala = escalaCss;
-    this.camara();
+    if (this.listo) this.camara();
   }
 
   private camara() {
@@ -223,13 +232,18 @@ export class Juego {
     if (this.destruido) return;
     const dt = this.ultimo ? Math.min(50, ahora - this.ultimo) : 16;
     this.ultimo = ahora;
-    this.actualizar(dt);
-    this.dibujar();
+    if (this.listo) {
+      this.actualizar(dt);
+      this.dibujar();
+    } else {
+      this.ctx.fillStyle = "#101518";
+      this.ctx.fillRect(0, 0, this.vistaW, this.vistaH);
+    }
     this.raf = requestAnimationFrame(this.cuadro);
   };
 
   private actualizar(dt: number) {
-    this.tAgua += dt;
+    this.reloj += dt;
     const j = this.jugador;
     const dialogoAbierto = this.puente.leer().dialogo !== null;
 
@@ -282,6 +296,7 @@ export class Juego {
         }
       }
     }
+
     // de vez en cuando, un personaje mira hacia otro lado (menos el que está conversando)
     this.tMirada -= dt;
     if (this.tMirada <= 0 && this.npcs.length) {
@@ -302,15 +317,10 @@ export class Juego {
     return !this.npcs.some((n) => n.x === x && n.y === y);
   }
 
-  private cuadroDe(e: Entidad) {
-    if (!e.moviendo) return 0;
-    return e.t % 1 < 0.5 ? (e.pie ? 2 : 1) : 0;
-  }
-
   // ---------- interacción ----------
 
   private interactuar() {
-    if (!this.activo || this.puente.leer().dialogo) return;
+    if (!this.listo || !this.activo || this.puente.leer().dialogo) return;
     const j = this.jugador;
     if (j.moviendo) {
       this.accionPendiente = true;
@@ -323,16 +333,22 @@ export class Juego {
     if (npc) {
       npc.dir = OPUESTA[j.dir];
       const def = this.npcDefs.get(npc.id);
-      if (def) this.abrir(def.dialogo(), def.id);
+      if (def) this.abrir(def);
       return;
     }
     const h = this.mapa.hotspots.get(clave(tx, ty));
     if (h) this.abrir(h.dialogo());
   }
 
-  private abrir(dialogo: Dialogo, npcId?: string) {
+  private abrir(fuente: Npc | Dialogo) {
     this.entrada.limpiar();
-    this.puente.actualizar({ dialogo: { dialogo, indice: 0, npcId } });
+    if ("sprite" in fuente) {
+      const dialogo = fuente.dialogo();
+      const retrato = this.graficos === "paquete" && PERSONAJES_REALES[fuente.sprite] ? retratoDe(fuente.sprite) : undefined;
+      this.puente.actualizar({ dialogo: { dialogo: { retrato, ...dialogo }, indice: 0, npcId: fuente.id } });
+    } else {
+      this.puente.actualizar({ dialogo: { dialogo: fuente, indice: 0 } });
+    }
   }
 
   // ---------- dibujo ----------
@@ -344,25 +360,18 @@ export class Juego {
     c.fillRect(0, 0, this.vistaW, this.vistaH);
     c.drawImage(this.base, -cx, -cy);
 
-    const paso = Math.floor(this.tAgua / 450);
-    for (const a of this.mapa.animados) {
-      const sx = a.x * TILE - cx;
-      const sy = a.y * TILE - cy;
-      if (sx < -TILE || sy < -TILE || sx > this.vistaW || sy > this.vistaH) continue;
-      this.atlas.dibujar(c, a.frames[paso % a.frames.length], sx, sy);
-    }
-
     const entidades = [...this.npcs, this.jugador].sort((a, b) => a.py - b.py);
     for (const e of entidades) {
+      const celda = e.hoja.celda(e.dir, e.moviendo, e.t, e.pie);
       let sx = Math.round(e.px - cx);
-      let sy = Math.round(e.py - cy) - 4; // la cabeza asoma sobre la casilla
+      let sy = Math.round(e.py - cy) - e.hoja.offsetY;
       if (e === this.jugador && this.tTope > 70) {
         // un píxel hacia el obstáculo durante el empujón
         sx += DELTA[e.dir].x;
         sy += DELTA[e.dir].y;
       }
-      if (sx < -TILE || sy < -20 || sx > this.vistaW || sy > this.vistaH) continue;
-      c.drawImage(e.hoja.imagen, this.cuadroDe(e) * 16, FILA_DIR[e.dir] * 20, 16, 20, sx, sy, 16, 20);
+      if (sx < -TILE || sy < -celda.h || sx > this.vistaW || sy > this.vistaH) continue;
+      c.drawImage(e.hoja.imagen, celda.sx, celda.sy, celda.w, celda.h, sx, sy, celda.w, celda.h);
     }
 
     c.drawImage(this.capaEncima, -cx, -cy);
@@ -375,7 +384,7 @@ export class Juego {
       const ty = j.y + d.y;
       const hay = this.npcs.some((n) => n.x === tx && n.y === ty) || this.mapa.hotspots.has(clave(tx, ty));
       if (hay) {
-        const bob = Math.round(Math.sin(this.tAgua / 220));
+        const bob = Math.round(Math.sin(this.reloj / 220));
         this.atlas.dibujar(c, this.aviso, tx * TILE - cx, ty * TILE - 14 - cy + bob);
       }
     }
@@ -408,6 +417,7 @@ export class Juego {
         dialogo: this.puente.leer().dialogo !== null,
         escala: this.escala,
         vista: { x: this.vistaW, y: this.vistaH },
+        graficos: this.graficos,
       }),
       teletransportar: (x, y, dir) => {
         const j = this.jugador;
@@ -422,7 +432,7 @@ export class Juego {
       hablar: () => this.interactuar(),
       abrirDialogo: (npcId) => {
         const def = this.npcDefs.get(npcId);
-        if (def) this.abrir(def.dialogo(), def.id);
+        if (def) this.abrir(def);
       },
     };
   }

@@ -1,24 +1,19 @@
 import type { Leyenda } from "../tipos";
 
-// Caracteres del mapa ASCII → tiles del atlas.
+// Caracteres del mapa ASCII → tiles del atlas. El pasto es la base de todo; lo demás se dibuja encima.
 export const LEYENDA: Leyenda = {
   // suelo
-  ".": { tile: ["pasto", "pasto", "pasto2", "pasto3"] },
+  ".": { tile: ["pasto", "pasto", "pasto", "pasto2", "pasto3", "pasto4"] },
   ",": { tile: "pasto_alto" },
   "*": { tile: "flores_rosa" },
   "+": { tile: "flores_amar" },
   "%": { tile: "flores_azul" },
-  "=": { tile: "camino" },
-  p: { tile: "piso_plaza" },
-  s: { tile: "arena" },
-  "~": { tile: "agua", solido: true, anim: ["agua", "agua2"] },
-  // objetos (fondo transparente, se posan sobre el suelo)
-  T: { tile: "arbol", solido: true },
+  "=": { auto: "camino" },
+  p: { auto: "plaza" },
+  "~": { auto: "agua", solido: true },
+  // objetos sueltos (los árboles, rocas y edificios son estampas)
   b: { tile: "arbusto", solido: true },
   o: { tile: "roca", solido: true },
-  "#": { tile: "muro", solido: true },
-  "^": { tile: "muro_cima", solido: true },
-  C: { tile: "cueva", solido: true },
   "-": { tile: "cerca_h", solido: true },
   "|": { tile: "cerca_v", solido: true },
   S: { tile: "letrero", solido: true },

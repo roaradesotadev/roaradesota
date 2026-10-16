@@ -1,8 +1,8 @@
-// El pueblo: 40 × 30 casillas. El suelo y los objetos se pintan por código sobre una grilla ASCII,
-// y los edificios entran como estampas. Coordenadas en casillas, (0,0) arriba a la izquierda.
-import type { HotspotFijo, MapaDef, Npc } from "../tipos";
+// El pueblo: 40 × 30 casillas. El suelo y los objetos se pintan por código sobre una grilla ASCII;
+// los edificios, árboles y rocas entran como estampas. Coordenadas en casillas, (0,0) arriba a la izquierda.
+import type { Colocacion, HotspotFijo, MapaDef, Npc } from "../tipos";
 import { LEYENDA } from "./leyenda";
-import { EDIFICIOS, puertaDe } from "./estampas";
+import { EDIFICIOS, DECORADOS, puertaDe } from "./estampas";
 import { DIALOGOS } from "./dialogos";
 
 const W = 40;
@@ -20,88 +20,121 @@ function poner(g: Grilla, puntos: [number, number][], ch: string) {
 
 const suelo = grilla(".");
 const objetos = grilla(" ");
-
-// --- suelo ---
-rect(suelo, 19, 8, 2, 20, "="); // camino principal, de la sede al sur
-rect(suelo, 5, 16, 32, 2, "="); // camino este-oeste
-rect(suelo, 8, 27, 27, 1, "="); // camino del sur, frente a los edificios
-rect(suelo, 6, 9, 13, 1, "="); // camino de la mina
-rect(suelo, 29, 8, 1, 8, "="); // de la casa modelo al camino
-rect(suelo, 15, 11, 10, 7, "p"); // la plaza
-rect(suelo, 1, 20, 7, 8, "s"); // orilla del estanque
-rect(suelo, 2, 21, 5, 6, "~"); // el estanque
-rect(suelo, 10, 3, 5, 4, "*");
-rect(suelo, 25, 8, 3, 3, "+");
-rect(suelo, 36, 17, 3, 3, "%");
-rect(suelo, 1, 17, 4, 3, ",");
-rect(suelo, 36, 8, 3, 2, ",");
-rect(suelo, 13, 18, 3, 2, "*");
-rect(suelo, 26, 18, 3, 2, "+");
-
-// --- objetos ---
-rect(objetos, 0, 0, W, 1, "T"); // borde de árboles
-rect(objetos, 0, H - 1, W, 1, "T");
-rect(objetos, 0, 0, 1, H, "T");
-rect(objetos, W - 1, 0, 1, H, "T");
-rect(objetos, 1, 1, 9, 8, "#"); // la montaña de la mina
-rect(objetos, 1, 1, 9, 1, "^");
-poner(objetos, [[6, 8]], "C"); // entrada de la mina
-rect(objetos, 21, 9, 4, 1, "-"); // cerca de la sede
-poner(objetos, [[12, 12], [13, 13], [27, 12], [28, 13], [10, 18], [31, 18], [16, 28], [36, 28], [3, 28], [11, 1], [24, 1], [33, 7], [37, 11], [38, 14]], "T");
-poner(objetos, [[14, 10], [25, 10], [14, 18], [25, 18], [2, 15], [37, 21], [37, 26]], "b");
-poner(objetos, [[3, 10], [8, 11], [37, 3], [36, 6]], "o");
+const colocaciones: Colocacion[] = [];
 
 // --- edificios: nombre, esquina superior izquierda ---
-const colocaciones = [
-  { estampa: "sede_intnova", x: 16, y: 2, id: "intnova" },
+const edificios: Colocacion[] = [
+  { estampa: "sede_intnova", x: 18, y: 2, id: "intnova" },
   { estampa: "laboratorio", x: 33, y: 2, id: "laboratorio" },
   { estampa: "casa_modelo", x: 26, y: 3, id: "inmobiliaria" },
   { estampa: "oficina", x: 31, y: 10, id: "consultoria" },
-  { estampa: "academia", x: 3, y: 11, id: "academia" },
-  { estampa: "centro_comercial", x: 8, y: 20, id: "centro_comercial" },
-  { estampa: "universidad", x: 21, y: 20, id: "universidad" },
-  { estampa: "banco", x: 30, y: 20, id: "banca" },
+  { estampa: "academia", x: 3, y: 12, id: "academia" },
+  { estampa: "centro_comercial", x: 9, y: 22, id: "centro_comercial" },
+  { estampa: "universidad", x: 21, y: 22, id: "universidad" },
+  { estampa: "banco", x: 29, y: 20, id: "banca" },
 ];
+colocaciones.push(...edificios);
 
 const puerta = (id: string) => {
-  const c = colocaciones.find((k) => k.id === id)!;
+  const c = edificios.find((k) => k.id === id)!;
   const p = puertaDe(c.estampa);
   return { x: c.x + p.col, y: c.y + p.fila };
 };
+// quien atiende afuera (a la derecha de la puerta) y el letrero (a la izquierda)
+const afuera = (id: string, dx: number) => {
+  const p = puerta(id);
+  return { x: p.x + dx, y: p.y + 1 };
+};
+
+// --- la mina: rocas y entrada, al noroeste ---
+colocaciones.push(
+  { estampa: "roca_grande", x: 2, y: 2 },
+  { estampa: "roca_grande", x: 6, y: 2 },
+  { estampa: "roca_media", x: 2, y: 6 },
+  { estampa: "mina_entrada", x: 5, y: 6 },
+  { estampa: "roca_chica", x: 10, y: 3 },
+);
+
+// --- árboles: borde del mapa de dos casillas y algunos grupos adentro ---
+for (let x = 0; x < W; x += 2) {
+  colocaciones.push({ estampa: x % 4 ? "arbol2" : "arbol", x, y: 0 });
+  colocaciones.push({ estampa: x % 4 ? "arbol" : "arbol2", x, y: H - 2 });
+}
+for (let y = 2; y < H - 2; y += 2) {
+  colocaciones.push({ estampa: y % 4 ? "arbol" : "arbol2", x: 0, y });
+  colocaciones.push({ estampa: y % 4 ? "arbol2" : "arbol", x: W - 2, y });
+}
+colocaciones.push(
+  { estampa: "arboleda", x: 11, y: 11 },
+  { estampa: "arbol", x: 11, y: 6 },
+  { estampa: "arbol2", x: 14, y: 3 },
+  { estampa: "arbol", x: 23, y: 9 },
+  { estampa: "arbol2", x: 36, y: 13 },
+  { estampa: "arbol", x: 3, y: 18 },
+  { estampa: "arbol2", x: 12, y: 18 },
+  { estampa: "arbol", x: 26, y: 18 },
+  { estampa: "arbol2", x: 35, y: 26 },
+  { estampa: "arbol", x: 13, y: 26 },
+  { estampa: "torii", x: 19, y: 18 },
+);
+
+// --- suelo ---
+rect(suelo, 19, 7, 2, 20, "="); // camino principal, de la sede al sur
+rect(suelo, 5, 16, 32, 2, "="); // camino este-oeste
+rect(suelo, 8, 26, 26, 1, "="); // camino del sur, frente a los edificios
+rect(suelo, 6, 8, 13, 1, "="); // camino de la mina
+rect(suelo, 27, 6, 1, 10, "="); // de la casa modelo al camino
+rect(suelo, 32, 13, 1, 3, "="); // de la oficina al camino
+rect(suelo, 15, 11, 10, 7, "p"); // la plaza
+rect(suelo, 2, 21, 5, 6, "~"); // el estanque
+rect(suelo, 10, 3, 4, 4, "*");
+rect(suelo, 24, 8, 3, 3, "+");
+rect(suelo, 35, 17, 3, 3, "%");
+rect(suelo, 2, 17, 3, 3, ",");
+rect(suelo, 35, 7, 3, 2, ",");
+rect(suelo, 13, 19, 3, 2, "*");
+rect(suelo, 26, 20, 3, 2, "+");
+rect(suelo, 8, 23, 2, 2, "%");
+
+// --- objetos sueltos ---
+rect(objetos, 22, 8, 4, 1, "-"); // cerca de la sede
+poner(objetos, [[14, 10], [25, 10], [14, 18], [25, 18], [8, 19], [34, 8], [37, 22]], "b");
+poner(objetos, [[10, 9], [3, 10], [36, 6], [36, 27], [9, 21]], "o");
 
 // --- personajes ---
 const npcs: Npc[] = [
   { id: "rodrigo", nombre: "Rodrigo", sprite: "rodrigo", x: 20, y: 12, dir: "abajo", dialogo: DIALOGOS.rodrigoPlaza },
-  { id: "jarvis", nombre: "Jarvis", sprite: "jarvis", x: 19, y: 8, dir: "abajo", dialogo: DIALOGOS.jarvis },
-  { id: "jefa", nombre: "Jefa de procesos", sprite: "jefa", x: 7, y: 9, dir: "abajo", dialogo: DIALOGOS.jefa },
-  { id: "analista", nombre: "Analista de la inmobiliaria", sprite: "analista", x: 28, y: 8, dir: "abajo", dialogo: DIALOGOS.analista },
-  { id: "keyuser", nombre: "Key user de SAP", sprite: "keyuser", x: 33, y: 15, dir: "abajo", dialogo: DIALOGOS.keyuser },
-  { id: "steward", nombre: "Data steward", sprite: "steward", x: 33, y: 26, dir: "abajo", dialogo: DIALOGOS.steward },
-  { id: "coordinador", nombre: "Coordinador de innovación", sprite: "coordinador", x: 12, y: 26, dir: "abajo", dialogo: DIALOGOS.coordinador },
-  { id: "profesor", nombre: "Profesor", sprite: "profesor", x: 25, y: 26, dir: "abajo", dialogo: DIALOGOS.profesor },
-  { id: "facilitador", nombre: "Facilitador", sprite: "facilitador", x: 7, y: 16, dir: "izquierda", dialogo: DIALOGOS.facilitador },
+  { id: "jarvis", nombre: "Jarvis", sprite: "jarvis", ...afuera("intnova", 1), dir: "abajo", dialogo: DIALOGOS.jarvis },
+  { id: "jefa", nombre: "Jefa de procesos", sprite: "jefa", x: 9, y: 7, dir: "abajo", dialogo: DIALOGOS.jefa },
+  { id: "analista", nombre: "Analista de la inmobiliaria", sprite: "analista", ...afuera("inmobiliaria", 1), dir: "abajo", dialogo: DIALOGOS.analista },
+  { id: "keyuser", nombre: "Key user de SAP", sprite: "keyuser", ...afuera("consultoria", 1), dir: "abajo", dialogo: DIALOGOS.keyuser },
+  { id: "steward", nombre: "Data steward", sprite: "steward", ...afuera("banca", 1), dir: "abajo", dialogo: DIALOGOS.steward },
+  { id: "coordinador", nombre: "Coordinador de innovación", sprite: "coordinador", ...afuera("centro_comercial", 1), dir: "abajo", dialogo: DIALOGOS.coordinador },
+  { id: "profesor", nombre: "Profesor", sprite: "profesor", ...afuera("universidad", 1), dir: "abajo", dialogo: DIALOGOS.profesor },
+  { id: "facilitador", nombre: "Facilitador", sprite: "facilitador", ...afuera("academia", 1), dir: "abajo", dialogo: DIALOGOS.facilitador },
 ];
 
 // --- letreros, buzón, puertas ---
 const letreros: { x: number; y: number; dialogo: () => ReturnType<typeof DIALOGOS.letreroPlaza> }[] = [
   { x: 18, y: 12, dialogo: DIALOGOS.letreroPlaza },
-  { x: 18, y: 8, dialogo: () => DIALOGOS.letreroEdificio("intnova", "2026 – hoy") },
-  { x: 4, y: 9, dialogo: () => DIALOGOS.letreroEdificio("mineria", "2022 – 2024") },
-  { x: 3, y: 16, dialogo: () => DIALOGOS.letreroEdificio("academia", "2026") },
-  { x: 30, y: 8, dialogo: () => DIALOGOS.letreroEdificio("inmobiliaria", "2024") },
-  { x: 35, y: 15, dialogo: () => DIALOGOS.letreroEdificio("consultoria", "2024") },
-  { x: 31, y: 26, dialogo: () => DIALOGOS.letreroEdificio("banca", "2024 – 2026") },
-  { x: 9, y: 26, dialogo: () => DIALOGOS.letreroEdificio("main", "Centro comercial de Lima · 2025") },
-  { x: 22, y: 26, dialogo: () => DIALOGOS.letreroEdificio("universidad", "2017 – 2022") },
-  { x: 33, y: 6, dialogo: () => DIALOGOS.letreroEdificio("laboratorio", "próximamente") },
+  { ...afuera("intnova", -2), dialogo: () => DIALOGOS.letreroEdificio("intnova", "2026 – hoy") },
+  { x: 5, y: 8, dialogo: () => DIALOGOS.letreroEdificio("mineria", "2022 – 2024") },
+  { ...afuera("academia", -1), dialogo: () => DIALOGOS.letreroEdificio("academia", "2026") },
+  { ...afuera("inmobiliaria", -1), dialogo: () => DIALOGOS.letreroEdificio("inmobiliaria", "2024") },
+  { ...afuera("consultoria", -1), dialogo: () => DIALOGOS.letreroEdificio("consultoria", "2024") },
+  { ...afuera("banca", -1), dialogo: () => DIALOGOS.letreroEdificio("banca", "2024 – 2026") },
+  { ...afuera("centro_comercial", -1), dialogo: () => DIALOGOS.letreroEdificio("main", "Centro comercial de Lima · 2025") },
+  { ...afuera("universidad", 2), dialogo: () => DIALOGOS.letreroEdificio("universidad", "2017 – 2022") },
+  { ...afuera("laboratorio", -1), dialogo: () => DIALOGOS.letreroEdificio("laboratorio", "próximamente") },
 ];
 poner(objetos, letreros.map((l) => [l.x, l.y]), "S");
-poner(objetos, [[25, 8]], "M");
+poner(objetos, [[23, 7]], "M");
 
 const hotspots: HotspotFijo[] = [
   ...letreros.map((l) => ({ tipo: "letrero" as const, x: l.x, y: l.y, dialogo: l.dialogo })),
-  { tipo: "buzon", x: 25, y: 8, dialogo: DIALOGOS.buzon },
-  { tipo: "objeto", x: 6, y: 8, dialogo: DIALOGOS.cueva },
+  { tipo: "buzon", x: 23, y: 7, dialogo: DIALOGOS.buzon },
+  { tipo: "objeto", x: 6, y: 7, dialogo: DIALOGOS.cueva },
+  { tipo: "objeto", x: 7, y: 7, dialogo: DIALOGOS.cueva },
   { tipo: "puerta", ...puerta("intnova"), dialogo: () => DIALOGOS.puertaCerrada("Jarvis") },
   { tipo: "puerta", ...puerta("laboratorio"), dialogo: DIALOGOS.laboratorio },
   { tipo: "puerta", ...puerta("inmobiliaria"), dialogo: () => DIALOGOS.puertaCerrada("La analista") },
@@ -112,13 +145,16 @@ const hotspots: HotspotFijo[] = [
   { tipo: "puerta", ...puerta("banca"), dialogo: () => DIALOGOS.puertaCerrada("El data steward") },
 ];
 
-// Comprobación en desarrollo: ningún personaje sobre un edificio.
-for (const n of npcs) {
+// Comprobación en desarrollo: ningún personaje ni letrero dentro de una estampa sólida.
+const tam = (nombre: string) => EDIFICIOS[nombre] ?? DECORADOS[nombre];
+const mascaraDe = (nombre: string): boolean[][] | undefined => DECORADOS[nombre]?.solido;
+for (const p of [...npcs, ...letreros, { x: 20, y: 15 }]) {
   for (const c of colocaciones) {
-    const e = EDIFICIOS[c.estampa];
-    if (n.x >= c.x && n.x < c.x + e.ancho && n.y >= c.y && n.y < c.y + e.alto) {
-      throw new Error(`El personaje ${n.id} está dentro de ${c.estampa}`);
-    }
+    const e = tam(c.estampa);
+    const dentro = p.x >= c.x && p.x < c.x + e.ancho && p.y >= c.y && p.y < c.y + e.alto;
+    const mascara = mascaraDe(c.estampa);
+    const solido = !mascara || !!mascara[p.y - c.y]?.[p.x - c.x];
+    if (dentro && solido) throw new Error(`(${p.x},${p.y}) cae dentro de ${c.estampa} en ${c.x},${c.y}`);
   }
 }
 

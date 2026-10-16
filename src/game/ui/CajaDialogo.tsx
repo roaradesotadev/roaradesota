@@ -99,7 +99,7 @@ function Caja({ puente, d }: { puente: Puente; d: EstadoDialogo }) {
 
   return (
     <div
-      className="dialogo"
+      className={`dialogo${d.dialogo.retrato ? " con-retrato" : ""}`}
       role="dialog"
       aria-label={d.dialogo.hablante ?? "Mensaje"}
       onClick={() => {
@@ -107,6 +107,9 @@ function Caja({ puente, d }: { puente: Puente; d: EstadoDialogo }) {
       }}
     >
       {d.dialogo.hablante && <div className="dialogo-nombre">{d.dialogo.hablante}</div>}
+      {/* retrato de 38 px en pixel art: next/image lo reescalaría con suavizado */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {d.dialogo.retrato && <img className="dialogo-retrato" src={d.dialogo.retrato} alt="" width={38} height={38} />}
       <p className="dialogo-texto" aria-hidden="true">
         {visible}
       </p>

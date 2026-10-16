@@ -195,6 +195,19 @@
   border: 4px solid var(--j-tinta);
   box-shadow: inset 0 0 0 3px #fff, 5px 5px 0 #0b0e10;
 }
+.dialogo.con-retrato {
+  padding-left: 110px;
+}
+.dialogo-retrato {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  width: 76px;
+  height: 76px;
+  image-rendering: pixelated;
+  border: 3px solid var(--j-tinta);
+  background: #fff;
+}
 .dialogo-nombre {
   position: absolute;
   top: -20px;
@@ -362,9 +375,13 @@
 }
 
 @media (max-width: 640px) {
-  .dialogo {
+  .dialogo,
+  .dialogo.con-retrato {
     font-size: 17px;
     padding: 12px 36px 14px 14px;
+  }
+  .dialogo-retrato {
+    display: none;
   }
   .dialogo-nombre {
     font-size: 14px;

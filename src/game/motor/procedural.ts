@@ -1,6 +1,6 @@
-// Gráficos dibujados en código: el atlas de tiles y las hojas de personajes.
-// Son el marcador de posición mientras no haya un paquete CC0 aprobado, y el plan B si no lo hay.
-import { TILE } from "../tipos";
+// El atlas de tiles (dibujos de 16 × 16 en un solo lienzo) y los gráficos dibujados en código:
+// son el plan B si el paquete de gráficos no carga, y aportan los pocos dibujos que el paquete no trae.
+import { TILE, type Celda, type Direccion, type HojaPersonaje } from "../tipos";
 
 const PAL = {
   pasto: "#8cd46c",
@@ -8,9 +8,8 @@ const PAL = {
   pastoClaro: "#a6e088",
   camino: "#e4d29a",
   caminoPunto: "#b89f66",
-  piedra: "#cfd3cc",
-  piedraOsc: "#aab0a8",
-  arena: "#efe3b4",
+  piedra: "#dfe4dd",
+  piedraOsc: "#c9d0c8",
   agua: "#5aa8f0",
   aguaClara: "#a4d8fb",
   tronco: "#7a5230",
@@ -38,7 +37,7 @@ const PAL = {
   flor3: "#8ea0f0",
 };
 
-class Pincel {
+export class Pincel {
   constructor(
     private ctx: CanvasRenderingContext2D,
     private ox: number,
@@ -54,7 +53,6 @@ class Pincel {
   fondo(color: string) {
     this.rect(0, 0, TILE, TILE, color);
   }
-  // Puntos pseudoaleatorios pero estables (misma semilla, mismo dibujo).
   motas(color: string, n: number, semilla: number) {
     let s = semilla * 7919 + 13;
     for (let i = 0; i < n; i++) {
@@ -67,6 +65,10 @@ class Pincel {
   }
 }
 
+// Sufijos de un conjunto con bordes: centro, bordes, esquinas, tiras y punto suelto.
+export const SUFIJOS_AUTO = ["c", "t", "b", "l", "r", "tl", "tr", "bl", "br", "v", "vt", "vb", "h", "hl", "hr", "dot"] as const;
+export type SufijoAuto = (typeof SUFIJOS_AUTO)[number];
+
 export class Atlas {
   imagen: HTMLCanvasElement;
   readonly columnas = 16;
@@ -74,21 +76,44 @@ export class Atlas {
   private nombres = new Map<string, number>();
   private n = 0;
 
-  constructor(capacidad = 256) {
+  constructor(capacidad = 512) {
     this.imagen = document.createElement("canvas");
     this.imagen.width = TILE * this.columnas;
     this.imagen.height = TILE * Math.ceil(capacidad / this.columnas);
     this.ctx = this.imagen.getContext("2d")!;
   }
 
-  registrar(nombre: string, pintor: (p: Pincel) => void): number {
-    const previo = this.nombres.get(nombre);
-    if (previo !== undefined) return previo;
+  private reservar(nombre: string): number | null {
+    if (this.nombres.has(nombre)) return null;
     const idx = this.n++;
     if ((idx + 1) * TILE > this.imagen.height * this.columnas) this.crecer();
-    pintor(new Pincel(this.ctx, (idx % this.columnas) * TILE, Math.floor(idx / this.columnas) * TILE));
     this.nombres.set(nombre, idx);
     return idx;
+  }
+
+  private origen(idx: number) {
+    return { x: (idx % this.columnas) * TILE, y: Math.floor(idx / this.columnas) * TILE };
+  }
+
+  registrar(nombre: string, pintor: (p: Pincel) => void): number {
+    const idx = this.reservar(nombre);
+    if (idx === null) return this.indice(nombre);
+    const o = this.origen(idx);
+    pintor(new Pincel(this.ctx, o.x, o.y));
+    return idx;
+  }
+
+  // Copia un recorte de 16 × 16 de una hoja externa (coordenadas en casillas).
+  registrarRecorte(nombre: string, hoja: CanvasImageSource, col: number, fila: number): number {
+    const idx = this.reservar(nombre);
+    if (idx === null) return this.indice(nombre);
+    const o = this.origen(idx);
+    this.ctx.drawImage(hoja, col * TILE, fila * TILE, TILE, TILE, o.x, o.y, TILE, TILE);
+    return idx;
+  }
+
+  alias(nombre: string, existente: string) {
+    if (!this.nombres.has(nombre)) this.nombres.set(nombre, this.indice(existente));
   }
 
   tiene(nombre: string) {
@@ -102,17 +127,8 @@ export class Atlas {
   }
 
   dibujar(ctx: CanvasRenderingContext2D, idx: number, x: number, y: number) {
-    ctx.drawImage(
-      this.imagen,
-      (idx % this.columnas) * TILE,
-      Math.floor(idx / this.columnas) * TILE,
-      TILE,
-      TILE,
-      x,
-      y,
-      TILE,
-      TILE,
-    );
+    const o = this.origen(idx);
+    ctx.drawImage(this.imagen, o.x, o.y, TILE, TILE, x, y, TILE, TILE);
   }
 
   private crecer() {
@@ -125,9 +141,41 @@ export class Atlas {
   }
 }
 
+// ---------- dibujos que se usan con y sin paquete ----------
+
+export function pintarBuzon(p: Pincel) {
+  p.rect(7, 10, 2, 6, PAL.maderaOsc);
+  p.rect(3, 3, 10, 8, "#3c6aa8");
+  p.rect(3, 3, 10, 2, "#2a4a80");
+  p.rect(5, 7, 6, 1, "#dce8f8");
+}
+
+export function pintarAviso(p: Pincel) {
+  // globo de "…" sobre quien se puede hablar
+  p.rect(3, 5, 10, 9, PAL.tinta);
+  p.rect(4, 6, 8, 7, "#ffffff");
+  p.rect(6, 14, 3, 1, PAL.tinta);
+  p.px(7, 14, "#ffffff");
+  p.px(7, 15, PAL.tinta);
+  p.px(5, 9, PAL.tinta);
+  p.px(7, 9, PAL.tinta);
+  p.px(9, 9, PAL.tinta);
+}
+
+export function pintarLetrero(p: Pincel) {
+  p.rect(7, 9, 2, 7, PAL.maderaOsc);
+  p.rect(2, 3, 12, 7, PAL.madera);
+  p.rect(2, 3, 12, 1, PAL.maderaOsc);
+  p.rect(2, 9, 12, 1, PAL.maderaOsc);
+  p.rect(1, 3, 1, 7, PAL.tinta);
+  p.rect(14, 3, 1, 7, PAL.tinta);
+  p.rect(2, 2, 12, 1, PAL.tinta);
+  p.rect(2, 10, 12, 1, PAL.tinta);
+  p.rect(4, 5, 8, 1, PAL.maderaOsc);
+  p.rect(4, 7, 6, 1, PAL.maderaOsc);
+}
+
 function flores(p: Pincel, color: string, puntos: [number, number][]) {
-  p.fondo(PAL.pasto);
-  p.motas(PAL.pastoOsc, 3, 9);
   for (const [x, y] of puntos) {
     p.rect(x, y, 2, 2, color);
     p.px(x + 2, y + 2, PAL.pastoOsc);
@@ -148,12 +196,10 @@ function techo(p: Pincel, color: string, oscuro: string, claro: string, parte: "
 function sombrear(hex: string, factor: number): string {
   const n = parseInt(hex.slice(1), 16);
   const c = (v: number) => Math.max(0, Math.min(255, Math.round(v * factor)));
-  const r = c((n >> 16) & 255);
-  const g = c((n >> 8) & 255);
-  const b = c(n & 255);
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+  return `#${((c((n >> 16) & 255) << 16) | (c((n >> 8) & 255) << 8) | c(n & 255)).toString(16).padStart(6, "0")}`;
 }
 
+// Atlas completo dibujado en código (plan B). Registra los mismos nombres que el atlas real.
 export function crearAtlasProcedural(): Atlas {
   const a = new Atlas();
   a.registrar("pasto", (p) => {
@@ -169,8 +215,9 @@ export function crearAtlasProcedural(): Atlas {
     p.fondo(PAL.pasto);
     p.motas(PAL.pastoOsc, 3, 4);
   });
+  a.alias("pasto4", "pasto3");
+  // los siguientes van sobre el pasto, con fondo transparente
   a.registrar("pasto_alto", (p) => {
-    p.fondo(PAL.pasto);
     for (const c of [1, 5, 9, 13]) {
       p.rect(c, 8, 1, 5, PAL.pastoOsc);
       p.rect(c + 1, 6, 1, 6, PAL.copaOsc);
@@ -184,32 +231,20 @@ export function crearAtlasProcedural(): Atlas {
     p.fondo(PAL.camino);
     p.motas(PAL.caminoPunto, 5, 5);
   });
-  a.registrar("piso_plaza", (p) => {
-    p.fondo("#dfe4dd");
-    p.rect(0, 7, TILE, 1, "#c9d0c8");
-    p.rect(7, 0, 1, 8, "#c9d0c8");
-    p.rect(3, 8, 1, 8, "#c9d0c8");
-    p.rect(11, 8, 1, 8, "#c9d0c8");
-    p.rect(0, 15, TILE, 1, "#c9d0c8");
-    p.px(2, 3, "#eef2ec");
-    p.px(12, 11, "#eef2ec");
-  });
-  a.registrar("arena", (p) => {
-    p.fondo(PAL.arena);
-    p.motas(PAL.caminoPunto, 3, 6);
+  a.registrar("plaza", (p) => {
+    p.fondo(PAL.piedra);
+    p.rect(0, 7, TILE, 1, PAL.piedraOsc);
+    p.rect(7, 0, 1, 8, PAL.piedraOsc);
+    p.rect(3, 8, 1, 8, PAL.piedraOsc);
+    p.rect(11, 8, 1, 8, PAL.piedraOsc);
+    p.rect(0, 15, TILE, 1, PAL.piedraOsc);
   });
   a.registrar("agua", (p) => {
     p.fondo(PAL.agua);
     p.rect(2, 4, 4, 1, PAL.aguaClara);
     p.rect(9, 10, 5, 1, PAL.aguaClara);
   });
-  a.registrar("agua2", (p) => {
-    p.fondo(PAL.agua);
-    p.rect(3, 5, 4, 1, PAL.aguaClara);
-    p.rect(8, 11, 5, 1, PAL.aguaClara);
-    p.px(13, 2, PAL.aguaClara);
-  });
-  // Objetos con fondo transparente: se posan sobre cualquier suelo.
+  for (const set of ["camino", "plaza", "agua"]) for (const s of SUFIJOS_AUTO) a.alias(`${set}_${s}`, set);
   a.registrar("arbol", (p) => {
     p.rect(6, 11, 4, 5, PAL.tronco);
     p.rect(2, 3, 12, 9, PAL.copa);
@@ -217,7 +252,6 @@ export function crearAtlasProcedural(): Atlas {
     p.rect(1, 5, 14, 5, PAL.copa);
     p.rect(4, 2, 4, 3, PAL.copaClara);
     p.rect(3, 9, 10, 3, PAL.copaOsc);
-    p.rect(6, 4, 2, 2, PAL.copaClara);
   });
   a.registrar("arbusto", (p) => {
     p.rect(2, 6, 12, 8, PAL.copa);
@@ -238,19 +272,10 @@ export function crearAtlasProcedural(): Atlas {
     p.rect(0, 13, 12, 1, PAL.muroOsc);
     p.motas(PAL.muroClaro, 3, 7);
   });
-  a.registrar("muro_cima", (p) => {
-    p.fondo(PAL.muro);
-    p.rect(0, 0, TILE, 6, PAL.muroClaro);
-    p.rect(0, 6, TILE, 2, PAL.muroOsc);
-    p.rect(2, 2, 3, 1, "#e0c8a8");
-    p.rect(9, 3, 4, 1, "#e0c8a8");
-  });
   a.registrar("cueva", (p) => {
     p.fondo(PAL.muro);
     p.rect(3, 5, 10, 11, PAL.tinta);
     p.rect(5, 3, 6, 2, PAL.tinta);
-    p.rect(2, 4, 1, 12, PAL.muroOsc);
-    p.rect(13, 4, 1, 12, PAL.muroOsc);
   });
   a.registrar("cerca_h", (p) => {
     p.rect(0, 6, TILE, 2, PAL.madera);
@@ -263,31 +288,17 @@ export function crearAtlasProcedural(): Atlas {
     p.rect(5, 2, 6, 2, PAL.maderaOsc);
     p.rect(5, 10, 6, 2, PAL.maderaOsc);
   });
-  a.registrar("letrero", (p) => {
-    p.rect(7, 9, 2, 7, PAL.maderaOsc);
-    p.rect(2, 3, 12, 7, PAL.madera);
-    p.rect(2, 3, 12, 1, PAL.maderaOsc);
-    p.rect(2, 9, 12, 1, PAL.maderaOsc);
-    p.rect(4, 5, 8, 1, PAL.maderaOsc);
-    p.rect(4, 7, 6, 1, PAL.maderaOsc);
-  });
-  a.registrar("buzon", (p) => {
-    p.rect(7, 10, 2, 6, PAL.maderaOsc);
-    p.rect(3, 3, 10, 8, "#3c6aa8");
-    p.rect(3, 3, 10, 2, "#2a4a80");
-    p.rect(5, 7, 6, 1, "#dce8f8");
-  });
+  a.registrar("letrero", pintarLetrero);
+  a.registrar("buzon", pintarBuzon);
+  a.registrar("aviso", pintarAviso);
   a.registrar("pared", (p) => {
     p.fondo(PAL.pared);
     p.rect(0, 5, TILE, 1, PAL.paredOsc);
     p.rect(0, 11, TILE, 1, PAL.paredOsc);
-    p.px(4, 2, PAL.paredOsc);
-    p.px(11, 8, PAL.paredOsc);
   });
   a.registrar("pared_ventana", (p) => {
     p.fondo(PAL.pared);
     p.rect(0, 5, TILE, 1, PAL.paredOsc);
-    p.rect(0, 11, TILE, 1, PAL.paredOsc);
     p.rect(4, 4, 8, 8, PAL.ventanaOsc);
     p.rect(5, 5, 6, 6, PAL.ventana);
     p.rect(8, 5, 1, 6, PAL.ventanaOsc);
@@ -295,33 +306,13 @@ export function crearAtlasProcedural(): Atlas {
   });
   a.registrar("pared_puerta", (p) => {
     p.fondo(PAL.pared);
-    p.rect(0, 5, TILE, 1, PAL.paredOsc);
     p.rect(4, 3, 8, 13, PAL.puertaOsc);
     p.rect(5, 4, 6, 12, PAL.puerta);
     p.px(9, 10, "#f0d060");
   });
-  a.registrar("aviso", (p) => {
-    // globo de "…" sobre quien se puede hablar
-    p.rect(3, 5, 10, 9, PAL.tinta);
-    p.rect(4, 6, 8, 7, "#ffffff");
-    p.rect(6, 14, 3, 1, PAL.tinta);
-    p.px(7, 14, "#ffffff");
-    p.px(7, 15, PAL.tinta);
-    p.px(5, 9, PAL.tinta);
-    p.px(7, 9, PAL.tinta);
-    p.px(9, 9, PAL.tinta);
-  });
-  a.registrar("puerta_lab", (p) => {
-    p.fondo(PAL.pared);
-    p.rect(4, 3, 8, 13, PAL.metalOsc);
-    p.rect(5, 4, 6, 12, PAL.metal);
-    p.rect(7, 4, 2, 12, PAL.metalOsc);
-    p.px(8, 8, "#ff5050");
-  });
   return a;
 }
 
-// Techo de un color: tres tiles (cima, cuerpo y borde inferior). Devuelve sus índices.
 export function techosDe(atlas: Atlas, clave: string, color: string) {
   const oscuro = sombrear(color, 0.72);
   const claro = sombrear(color, 1.22);
@@ -332,22 +323,13 @@ export function techosDe(atlas: Atlas, clave: string, color: string) {
   };
 }
 
-// ---------- Personajes ----------
+// ---------- Personajes dibujados en código ----------
 
-export type AparienciaPersonaje = {
-  piel?: string;
-  pelo: string;
-  ropa: string;
-  pantalon?: string;
-  robot?: boolean;
-};
+export type AparienciaPersonaje = { piel?: string; pelo: string; ropa: string; pantalon?: string; robot?: boolean };
 
-// Hoja de 3 cuadros (quieto, paso A, paso B) por 4 direcciones; celdas de 16 × 20 px.
-export type HojaPersonaje = { imagen: HTMLCanvasElement; ancho: 16; alto: 20 };
+const FILA_DIR: Record<Direccion, number> = { abajo: 0, arriba: 1, izquierda: 2, derecha: 3 };
 
-export const FILA_DIR = { abajo: 0, arriba: 1, izquierda: 2, derecha: 3 } as const;
-
-export function crearHojaPersonaje(ap: AparienciaPersonaje): HojaPersonaje {
+export function crearHojaProcedural(ap: AparienciaPersonaje): HojaPersonaje {
   const imagen = document.createElement("canvas");
   imagen.width = 16 * 3;
   imagen.height = 20 * 4;
@@ -357,7 +339,6 @@ export function crearHojaPersonaje(ap: AparienciaPersonaje): HojaPersonaje {
   const zapato = "#2e2a26";
 
   const pintar = (p: Pincel, dir: "abajo" | "arriba" | "izquierda", cuadro: number) => {
-    // piernas: el cuadro 1 adelanta la izquierda, el 2 la derecha
     const izqY = cuadro === 1 ? 14 : 15;
     const derY = cuadro === 2 ? 14 : 15;
     const colorPierna = ap.robot ? PAL.metalOsc : pantalon;
@@ -379,15 +360,12 @@ export function crearHojaPersonaje(ap: AparienciaPersonaje): HojaPersonaje {
       if (dir === "izquierda") p.rect(4, 5, 3, 2, "#4fd1c5");
       return;
     }
-    // cuerpo
     p.rect(4, 10, 8, 6, ap.ropa);
-    if (dir === "izquierda") {
-      p.rect(6, 11, 1, 4, piel);
-    } else {
+    if (dir === "izquierda") p.rect(6, 11, 1, 4, piel);
+    else {
       p.rect(3, 11, 1, 4, piel);
       p.rect(12, 11, 1, 4, piel);
     }
-    // cabeza
     p.rect(4, 4, 8, 7, piel);
     p.rect(3, 2, 10, 4, ap.pelo);
     if (dir === "abajo") {
@@ -403,12 +381,10 @@ export function crearHojaPersonaje(ap: AparienciaPersonaje): HojaPersonaje {
     }
   };
 
-  const dirs: ("abajo" | "arriba" | "izquierda" | "derecha")[] = ["abajo", "arriba", "izquierda", "derecha"];
-  dirs.forEach((dir, fila) => {
+  (["abajo", "arriba", "izquierda", "derecha"] as const).forEach((dir, fila) => {
     for (let cuadro = 0; cuadro < 3; cuadro++) {
       ctx.save();
       if (dir === "derecha") {
-        // la derecha es la izquierda en espejo
         ctx.translate(cuadro * 16 + 16, fila * 20);
         ctx.scale(-1, 1);
         pintar(new Pincel(ctx, 0, 0), "izquierda", cuadro);
@@ -419,17 +395,21 @@ export function crearHojaPersonaje(ap: AparienciaPersonaje): HojaPersonaje {
     }
   });
   contornear(imagen, 16, 20);
-  return { imagen, ancho: 16, alto: 20 };
+
+  const celda = (dir: Direccion, moviendo: boolean, t: number, pie: 0 | 1): Celda => {
+    const cuadro = !moviendo ? 0 : t % 1 < 0.5 ? (pie ? 2 : 1) : 0;
+    return { sx: cuadro * 16, sy: FILA_DIR[dir] * 20, w: 16, h: 20 };
+  };
+  return { imagen, offsetY: 4, celda };
 }
 
-// Contorno oscuro de 1 px alrededor de cada figura, sin cruzar los bordes de su celda (como los sprites de GBA).
+// Contorno oscuro de 1 px alrededor de cada figura, sin cruzar los bordes de su celda.
 function contornear(canvas: HTMLCanvasElement, celdaW: number, celdaH: number, color: [number, number, number] = [0x1c, 0x1a, 0x17]) {
   const ctx = canvas.getContext("2d")!;
   const { width: w, height: h } = canvas;
   const origen = ctx.getImageData(0, 0, w, h).data;
   const salida = ctx.createImageData(w, h);
   salida.data.set(origen);
-  const opaco = (x: number, y: number) => origen[(y * w + x) * 4 + 3] > 0;
   const vecinos = [
     [1, 0],
     [-1, 0],
@@ -445,7 +425,7 @@ function contornear(canvas: HTMLCanvasElement, celdaW: number, celdaH: number, c
         const ny = y + dy;
         if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
         if (Math.floor(nx / celdaW) !== Math.floor(x / celdaW) || Math.floor(ny / celdaH) !== Math.floor(y / celdaH)) continue;
-        if (opaco(nx, ny)) {
+        if (origen[(ny * w + nx) * 4 + 3] > 0) {
           salida.data[i] = color[0];
           salida.data[i + 1] = color[1];
           salida.data[i + 2] = color[2];
