@@ -69,6 +69,7 @@ export class Juego {
   private tGiro = 0;
   private tAgua = 0;
   private accionPendiente = false;
+  private tMirada = 2000;
   private quitarOyentes: (() => void)[] = [];
 
   constructor(
@@ -273,6 +274,17 @@ export class Juego {
           this.accionPendiente = false;
           this.interactuar();
         }
+      }
+    }
+    // de vez en cuando, un personaje mira hacia otro lado (menos el que está conversando)
+    this.tMirada -= dt;
+    if (this.tMirada <= 0 && this.npcs.length) {
+      this.tMirada = 1800 + Math.random() * 2600;
+      const n = this.npcs[Math.floor(Math.random() * this.npcs.length)];
+      const hablando = this.puente.leer().dialogo?.npcId === n.id;
+      if (!hablando) {
+        const dirs: Direccion[] = ["abajo", "izquierda", "derecha", "abajo"];
+        n.dir = dirs[Math.floor(Math.random() * dirs.length)];
       }
     }
     this.camara();
