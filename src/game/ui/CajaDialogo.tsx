@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Play } from "lucide-react";
 import type { Puente } from "../puente";
 import type { EstadoDialogo, Opcion } from "../tipos";
 import { useEstadoJuego } from "./usePuente";
@@ -132,6 +132,7 @@ function Caja({ puente, d }: { puente: Puente; d: EstadoDialogo }) {
                   elegir(op);
                 }}
               >
+                {i === sel && <Play className="cursor" size={14} fill="currentColor" strokeWidth={0} aria-hidden="true" />}
                 {op.texto}
               </button>
             </li>

@@ -237,17 +237,12 @@
 .dialogo-opciones button.activa {
   background: #dcece5;
 }
-.dialogo-opciones button.activa::before {
-  content: "";
+.dialogo-opciones button .cursor {
   position: absolute;
-  left: 10px;
+  left: 9px;
   top: 50%;
-  width: 0;
-  height: 0;
   transform: translateY(-50%);
-  border-left: 10px solid var(--j-verde);
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
+  color: var(--j-verde);
 }
 .dialogo-opciones button:focus-visible {
   outline: 3px solid var(--j-verde);
