@@ -61,6 +61,11 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+body:has(.pantalla-juego) {
+  overflow: hidden;
+  height: 100dvh;
+}
+
 ::selection {
   background: var(--mas-fondo);
   color: var(--tinta);

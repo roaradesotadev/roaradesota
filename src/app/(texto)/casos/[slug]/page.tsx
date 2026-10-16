@@ -29,7 +29,7 @@ export default async function PaginaCaso({ params }: PageProps<"/casos/[slug]">)
       <header className="caso-cabeza">
         <div className="caso-riel" aria-hidden="true" />
         <div>
-          <Link href={`/#${c.entrada}`} className="enlace-sec">
+          <Link href={`/historial#${c.entrada}`} className="enlace-sec">
             <ArrowLeft size={16} strokeWidth={2} aria-hidden="true" /> Volver al historial
           </Link>
           <h1>{c.titulo}</h1>
